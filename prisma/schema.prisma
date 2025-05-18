@@ -1,0 +1,248 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model users {
+  user_id   String     @id @default(uuid())
+  full_name String
+  email     String     @unique
+  password  String
+  phone     String
+  status    StatusUser @default(inactive)
+  createdAt DateTime   @default(now())
+
+  transactions transactions[]
+}
+
+model admins {
+  admin_id   String    @id @default(uuid())
+  full_name  String
+  email      String    @unique
+  password   String
+  role       RoleAdmin @default(inventory)
+  last_login DateTime?
+  createdAt  DateTime  @default(now())
+
+  verified_transactions transactions[]         @relation("borrowVerification")
+  return_verifications  transactions[]         @relation("returnVerification")
+  admin_notifications   AdminNotification[]
+  recorded_maintenance  EquipmentMaintenance[]
+}
+
+model equipment {
+  equipment_id       String          @id
+  name               String
+  quantity           Int
+  available_quantity Int
+  status             StatusEquipment @default(available)
+  createdAt          DateTime        @default(now())
+
+  category_id Int
+  category    categories @relation(fields: [category_id], references: [category_id])
+
+  transactions      TransactionEquipment[]
+  equipment_returns EquipmentReturn[]
+  maintenance       EquipmentMaintenance[]
+
+  @@index([category_id])
+  @@index([status])
+}
+
+model categories {
+  category_id   Int     @id @default(autoincrement())
+  category_name String
+  description   String?
+
+  equipment equipment[]
+}
+
+model transactions {
+  transaction_id Int               @id @default(autoincrement())
+  project        String
+  purpose        String
+  user_id        String
+  status         StatusTransaction @default(pending)
+  borrow_date    DateTime
+  return_date    DateTime
+  createdAt      DateTime          @default(now())
+
+  // Field untuk pengembalian
+  return_status StatusReturn @default(not_returned) // "not returned", "pending_check", "returned_complete", "returned_damaged", "returned_incomplete"
+  return_notes  String? // Catatan admin tentang pengembalian secara keseluruhan
+
+  // Admin yang memverifikasi peminjaman
+  verified_by String?
+  verified_at DateTime?
+  admin       admins?   @relation("borrowVerification", fields: [verified_by], references: [admin_id])
+
+  // Admin yang memverifikasi pengembalian
+  return_verified_by String?
+  return_verified_at DateTime?
+  return_admin       admins?   @relation("returnVerification", fields: [return_verified_by], references: [admin_id])
+
+  equipments        TransactionEquipment[]
+  equipment_returns EquipmentReturn[]
+  notifications     notifications[]
+
+  user users @relation(fields: [user_id], references: [user_id])
+
+  @@index([user_id])
+  @@index([status])
+  @@index([return_status])
+  @@index([verified_by])
+  @@index([return_verified_by])
+}
+
+// Join table untuk relasi many-to-many antara transactions dan equipment
+model TransactionEquipment {
+  id             Int    @id @default(autoincrement())
+  transaction_id Int
+  equipment_id   String
+  quantity       Int
+
+  transaction transactions @relation(fields: [transaction_id], references: [transaction_id])
+  equipment   equipment    @relation(fields: [equipment_id], references: [equipment_id])
+
+  @@unique([transaction_id, equipment_id])
+}
+
+// Join Table untuk relasi many-to-many antara transactions dan equipment
+// untuk pengembalian
+model EquipmentReturn {
+  id                Int             @id @default(autoincrement())
+  transaction_id    Int
+  equipment_id      String
+  returned_quantity Int
+  condition         ConditionReturn @default(good)
+  damage_notes      String?
+  return_date       DateTime        @default(now())
+
+  transaction transactions @relation(fields: [transaction_id], references: [transaction_id])
+  equipment   equipment    @relation(fields: [equipment_id], references: [equipment_id])
+
+  @@unique([transaction_id, equipment_id])
+}
+
+model EquipmentMaintenance {
+  id                Int               @id @default(autoincrement())
+  equipment_id      String
+  quantity          Int // Jumlah unit yang di-maintenance
+  start_date        DateTime          @default(now())
+  expected_end_date DateTime?
+  actual_end_date   DateTime?
+  maintenance_type  String // "repair", "cleaning", "calibration", "inspection"
+  description       String? // Deskripsi kerusakan atau alasan maintenance
+  technician_name   String? // Nama teknisi atau pihak yang melakukan maintenance
+  status            StatusMaintenance @default(ongoing) // "ongoing", "completed", "cancelled"
+  notes             String? // Catatan tambahan tentang proses maintenance
+
+  // Relasi ke model equipment
+  equipment equipment @relation(fields: [equipment_id], references: [equipment_id])
+
+  // Admin yang mencatat maintenance
+  recorded_by String?
+  admin       admins? @relation(fields: [recorded_by], references: [admin_id])
+
+  @@index([equipment_id])
+  @@index([status])
+}
+
+model notifications {
+  notification_id String           @id @default(uuid())
+  title           String
+  message         String
+  is_read         Boolean          @default(false)
+  type            NotificationType @default(transaction)
+  createdAt       DateTime         @default(now())
+
+  transaction_id Int?
+  transaction    transactions? @relation(fields: [transaction_id], references: [transaction_id])
+
+  // Many-to-many relationship between notifications and admins
+  admin_notifications AdminNotification[]
+
+  @@index([transaction_id])
+  @@index([is_read])
+  @@index([type])
+}
+
+// Join table for many-to-many relationship between admins and notifications
+model AdminNotification {
+  id              Int     @id @default(autoincrement())
+  admin_id        String
+  notification_id String
+  is_read         Boolean @default(false)
+
+  admin        admins        @relation(fields: [admin_id], references: [admin_id])
+  notification notifications @relation(fields: [notification_id], references: [notification_id])
+
+  @@unique([admin_id, notification_id])
+}
+
+enum StatusUser {
+  active
+  inactive
+}
+
+enum RoleAdmin {
+  superadmin
+  inventory
+}
+
+enum StatusEquipment {
+  available
+  not_available
+  maintenance
+}
+
+enum StatusTransaction {
+  pending
+  approved
+  rejected
+  completed
+  cancelled
+  overdue
+}
+
+enum StatusReturn {
+  not_returned
+  pending_check
+  returned_complete
+  returned_damaged
+  returned_incomplete
+}
+
+enum ConditionReturn {
+  good
+  damaged
+  incomplete
+  lost
+  other
+}
+
+enum StatusMaintenance {
+  ongoing
+  completed
+  cancelled
+}
+
+enum NotificationType {
+  transaction
+  equipment
+  maintenance
+  admin
+  other
+}

@@ -1,0 +1,190 @@
+<template>
+  <div>
+    <Toolbar class="mb-5">
+      <template #end>
+        <OverlayBadge :value="cart" severity="contrast" class="mr-5">
+          <Button
+            icon="i-material-symbols:shopping-cart"
+            severity="secondary"
+            @click="navigateTo('/cart')"
+          />
+        </OverlayBadge>
+      </template>
+    </Toolbar>
+
+    <DataTable
+      ref="dt"
+      show-gridlines
+      striped-rows
+      paginator
+      data-key="equipment_id"
+      :value="equipment"
+      :rows="6"
+    >
+      <template #header>
+        <div class="flex flex-wrap justify-between items-center gap-5">
+          <h2 class="font-bold">Daftar Alat</h2>
+          <IconField>
+            <InputIcon>
+              <div class="i-material-symbols:search" />
+            </InputIcon>
+            <InputText placeholder="Search..." />
+          </IconField>
+        </div>
+      </template>
+      <template #empty>
+        <p class="text-center">Tidak ada alat yang tersedia</p>
+      </template>
+      <template #loading><p class="text-center">Tunggu...</p></template>
+      <Column field="equipment_id" header="ID" class="text-base" />
+      <Column field="name" header="Nama Alat" class="text-base w-80" />
+      <Column field="status" header="Status Alat" class="text-base">
+        <template #body="slotProps">
+          <span
+            v-if="slotProps.data.available_quantity === 0"
+            class="text-red-500 font-semibold"
+            >Tidak Tersedia</span
+          >
+          <span
+            v-else-if="slotProps.data.status === 'available'"
+            class="text-green-500 font-semibold"
+            >Tersedia</span
+          >
+          <span
+            v-else-if="slotProps.data.status === 'maintenance'"
+            class="text-yellow-500 font-semibold"
+            >Diperbaiki</span
+          >
+        </template>
+      </Column>
+      <Column
+        field="available_quantity"
+        header="Jumlah Tersedia"
+        class="text-base"
+      />
+      <Column
+        field="category.category_name"
+        header="Kategori"
+        class="text-base"
+      />
+      <Column :exportable="false" style="min-width: 5rem">
+        <template #body="slotProps">
+          <Button
+            icon="i-material-symbols:add-shopping-cart"
+            :disabled="slotProps.data.available_quantity === 0"
+            outlined
+            rounded
+            @click.prevent="buttonAddToCart(slotProps.data)"
+          />
+        </template>
+      </Column>
+    </DataTable>
+
+    <Dialog
+      v-model:visible="addToCartDialog"
+      header="Tambah ke Keranjang"
+      class="w-full sm:w-[30rem]"
+      :modal="true"
+    >
+      <Form class="mt-1">
+        <div class="flex flex-col gap-5">
+          <FloatLabel variant="on">
+            <InputText
+              id="name"
+              v-model="addEquipment.name"
+              disabled
+              class="w-full"
+            />
+            <label for="name">Nama Alat</label>
+          </FloatLabel>
+          <FloatLabel variant="on">
+            <InputNumber
+              id="available_quantity"
+              v-model="addEquipment.available_quantity"
+              disabled
+              class="w-full"
+            />
+            <label for="available_quantity">Jumlah Tersedia</label>
+          </FloatLabel>
+          <FloatLabel variant="on">
+            <InputNumber
+              id="available_quantity"
+              v-model="borrowQuantity"
+              class="w-full"
+            />
+            <label for="available_quantity">Jumlah yang ingin dipinjam</label>
+          </FloatLabel>
+        </div>
+        <div class="py-6">
+          <Button
+            type="submit"
+            severity="contrast"
+            label="Tambah"
+            @click.prevent="addToCart"
+          />
+        </div>
+      </Form>
+    </Dialog>
+  </div>
+</template>
+
+<script lang="ts" setup>
+const toast = useToast();
+const eqStore = useEquipmentStore();
+const cartStore = useCartStore();
+
+const dt = ref();
+const equipment = ref();
+const addEquipment = ref();
+const borrowQuantity = ref(0);
+const addToCartDialog = ref(false);
+// const borrowDialog = ref(false);
+
+const refreshEquipment = async () => {
+  await eqStore.getEquipment();
+  equipment.value = eqStore.equipment;
+};
+
+const cart = computed(() => {
+  return cartStore.cart.length;
+});
+
+onMounted(() => {
+  refreshEquipment();
+});
+
+const buttonAddToCart = (eq: any) => {
+  addEquipment.value = eq;
+  addToCartDialog.value = true;
+};
+
+const addToCart = () => {
+  cartStore.addToCart({
+    equipment_id: addEquipment.value.equipment_id,
+    name: addEquipment.value.name,
+    quantity: borrowQuantity.value,
+    available_quantity: addEquipment.value.available_quantity,
+    status: addEquipment.value.status,
+    category: addEquipment.value.category,
+    createdAt: addEquipment.value.createdAt,
+    transactions: addEquipment.value.transactions,
+    maintenance: addEquipment.value.maintenance,
+    equipment_returns: addEquipment.value.equipment_returns,
+  });
+
+  addToCartDialog.value = false;
+};
+
+definePageMeta({
+  layout: "dashuser",
+  middleware: ["auth"],
+});
+
+useSeoMeta({
+  title: "Daftar Peralatan | Mediadesk",
+  description: "Daftar Peralatan yang bisa dipinjam",
+  ogTitle: "Daftar Peralatan | Mediadesk",
+});
+</script>
+
+<style></style>
