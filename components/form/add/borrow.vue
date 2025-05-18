@@ -1,5 +1,5 @@
 <template>
-  <Form class="flex flex-col gap-5 mt-1 w-full">
+  <Form class="flex flex-col gap-5 mt-1 w-full" @submit="addBorrow">
     <Stepper value="1" linear>
       <StepItem value="1">
         <Step>Form Pinjam</Step>
@@ -64,7 +64,7 @@
           </div>
           <div class="flex py-6 gap-2">
             <Button label="Back" severity="secondary" @click="activateCallback('1')" />
-            <Button v-if="checked" type="submit" severity="contrast" label="Pinjam" @click="addBorrow()" />
+            <Button v-if="checked" type="submit" severity="contrast" label="Pinjam" />
           </div>
         </StepPanel>
       </StepItem>
@@ -73,6 +73,8 @@
 </template>
 
 <script lang="ts" setup>
+const toast = useToast()
+
 const userStore = useUserStore();
 const cart = useCartStore();
 
@@ -152,7 +154,28 @@ const addBorrow = async () => {
       purpose: purpose.value,
       borrow_date: formatDate(borrowDate.value),
       return_date: formatDate(calculateReturnDate()),
+      equipments: cart.cart.map((item) => ({
+        equipment_id: item.equipment_id,
+        quantity: item.quantity,
+      })),
     },
+  }).then((res) => {
+    if (res.statusCode === 200) {
+      toast.add({
+        severity: "success",
+        summary: "Berhasil",
+        detail: "Form peminjaman sudah terkirim, tunggu verifikasi dari admin",
+        life: 3000,
+      });
+      cart.clearCart();
+    } else {
+      toast.add({
+        severity: "error",
+        summary: "Gagal",
+        detail: res.message,
+        life: 3000,
+      });
+    }
   })
 }
 
