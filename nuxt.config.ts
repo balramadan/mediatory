@@ -1,5 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import Aura from "@primeuix/themes/aura";
+import { myPreset } from "./lib/preset";
 
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
@@ -14,6 +14,9 @@ export default defineNuxtConfig({
     "pinia-plugin-persistedstate/nuxt",
     "@vueuse/nuxt",
   ],
+  build: {
+    transpile: ["primevue"],
+  },
   css: ["~/assets/css/global.css"],
   unocss: {
     nuxtLayers: true,
@@ -25,13 +28,14 @@ export default defineNuxtConfig({
   primevue: {
     options: {
       theme: {
-        preset: Aura,
+        preset: myPreset,
         options: {
           prefix: "p",
           darkModeSelector: "light",
           cssLayer: false,
         },
       },
+      ripple: true,
     },
   },
   vite: {

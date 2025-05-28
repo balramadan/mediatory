@@ -5,13 +5,28 @@
     <div id="logo" class="">
       <NuxtImg src="/logowi.png" height="30" />
     </div>
-    <div class="flex flex-row items-center gap-2">
-      <div
-        class="border border-solid border-black p-1 rounded-full"
-        sm="rounded"
+    <div class="flex flex-row items-center sm:gap-2">
+      <OverlayBadge
+        :value="notifBadge"
+        severity="contrast"
+        class="mr-5"
+        size="small"
       >
-        <div class="i-material-symbols:person text-black w-6 h-6 p-2" />
-      </div>
+        <Button
+          icon="i-material-symbols:notifications"
+          variant="text"
+          rounded
+          aria-label="Notifikasi"
+          severity="secondary"
+          @click.prevent="toggleNotif"
+        />
+      </OverlayBadge>
+      <Avatar
+        :label="getInitials(adminName)"
+        shape="circle"
+        size="normal"
+        style="background-color: #fdd835; color: #333"
+      />
       <div class="hidden" sm="flex flex-row items-center gap-1">
         <div sm="flex flex-col gap-0.2">
           <h2 class="text-xs text-fuchsia-600 font-bold">{{ adminName }}</h2>
@@ -19,13 +34,14 @@
         </div>
         <div
           class="p-2 cursor-pointer rounded transition-all ease-in-out duration-300 hover:bg-fuchsia-100"
-          @click.prevent="toggle"
+          @click.prevent="toggleMenu"
         >
           <div class="i-material-symbols:keyboard-arrow-down w-4 h-4" />
         </div>
       </div>
     </div>
   </div>
+
   <Menu id="overlay_menu" ref="pop" class="mt-2" :model="items" :popup="true">
     <template #item="{ item, props }">
       <NuxtLink
@@ -53,25 +69,87 @@
       </NuxtLink>
     </template>
   </Menu>
+
+  <Popover ref="popNotif" class="max-w-25rem max-h-50rem">
+    <div
+      v-for="(item, index) in notif"
+      :class="[
+        'flex flex-row items-center justify-between gap-5 px-2.5 py-2.5 cursor-pointer',
+        item.is_read ? 'bg-gray-100' : 'hover:bg-slate-100',
+      ]"
+      :key="index"
+    >
+      <div
+        class=""
+        @click.prevent="clickNotif(item.notification_id, item.transaction_id)"
+      >
+        <p class="text-sm font-semibold">
+          {{ item.title }}
+        </p>
+        <p class="text-xs">
+          {{ item.message }}
+        </p>
+      </div>
+      <div class="">
+        <Button
+          icon="i-material-symbols:more-vert"
+          severity="secondary"
+          variant="text"
+          @click.prevent="toggleMore($event, item.notification_id)"
+        />
+      </div>
+    </div>
+  </Popover>
+
+  <Menu ref="menuNotif" id="overlay_menu" :model="itemsNotif" :popup="true" />
 </template>
 
-<script setup>
+<script setup lang="ts">
+const adminStore = useAdminStore();
+const notifStore = useNotificationStore();
+
 // Variabel informasi admin
 const adminId = ref("");
 const adminName = ref("");
 const adminRole = ref("");
 
-// Informasi akan diambil melalui store admin
-onMounted(() => {
-  // Pinia
-  const store = useAdminStore();
+const notifId = ref();
 
-  adminId.value = store.admin.id;
-  adminName.value = store.admin.name;
-  adminRole.value = store.admin.role;
+const notif = computed(() => {
+  return [...notifStore.notifications].sort((a, b) => {
+    // Urutkan berdasarkan createdAt (dari terbaru ke terlama)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 });
 
+const notifBadge = computed(() => {
+  return notifStore.notifications.filter(
+    (notification) => !notification.is_read
+  ).length;
+});
+
+// Informasi akan diambil melalui store admin
+onMounted(async () => {
+  // Pinia
+  adminId.value = adminStore.admin.id;
+  adminName.value = adminStore.admin.name;
+  adminRole.value = adminStore.admin.role;
+
+  await notifStore.getNotification();
+});
+
+const getInitials = (name: string) => {
+  if (!name) return '?';
+  return name
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+};
+
 const pop = ref();
+const popNotif = ref();
 const items = ref([
   {
     label: "Profile",
@@ -84,8 +162,45 @@ const items = ref([
     route: "/admin/logout",
   },
 ]);
-const toggle = (event) => {
+const menuNotif = ref();
+const itemsNotif = ref([
+  {
+    label: "Tandai Sudah Dibaca",
+    icon: "i-material-symbols:mark-email-read",
+    command: async () => {
+      await markAsRead();
+    },
+  },
+  {
+    label: "Delete",
+    icon: "i-material-symbols:delete",
+    command: () => {},
+  },
+]);
+
+const toggleMenu = (event: any) => {
   pop.value.toggle(event);
+};
+
+const toggleNotif = (event: any) => {
+  popNotif.value.toggle(event);
+};
+
+const toggleMore = (event: any, id: string) => {
+  menuNotif.value.toggle(event);
+  notifId.value = id;
+};
+
+const markAsRead = async () => {
+  await notifStore.markAsRead(notifId.value).then(async () => {
+    await notifStore.getNotification();
+  });
+};
+
+const clickNotif = async (id: string, tr_id: number) => {
+  await notifStore.markAsRead(id).then(() => {
+    navigateTo(`/admin/transaction/${tr_id}`);
+  });
 };
 </script>
 

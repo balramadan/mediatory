@@ -31,12 +31,14 @@
     <DataTable
       ref="dt"
       v-model:selection="selectedEquipment"
-      :value="equipment"
-      :rows="6"
+      v-model:filters="filters"
       data-key="equipment_id"
       show-gridlines
       striped-rows
       paginator
+      :value="equipment"
+      :rows="6"
+      :globalFilterFields="['name', 'status', 'category.category_name']"
     >
       <template #header>
         <div class="flex flex-wrap justify-between items-center gap-5">
@@ -45,7 +47,7 @@
             <InputIcon>
               <div class="i-material-symbols:search" />
             </InputIcon>
-            <InputText placeholder="Search..." />
+            <InputText v-model="filters['global'].value" placeholder="Search..." />
           </IconField>
         </div>
       </template>
@@ -194,9 +196,13 @@
 
 <script lang="ts" setup>
 import type { Equipment } from "~/types/equipment";
+import { FilterMatchMode } from "@primevue/core/api";
 
 const toast = useToast();
 const storeEquipment = useEquipmentStore();
+const filters = ref({
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+});
 
 const dt = ref();
 const equipment = ref();

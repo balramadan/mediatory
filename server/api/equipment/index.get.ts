@@ -2,27 +2,46 @@ import prisma from "~/lib/prisma";
 
 export default defineEventHandler(async (event) => {
   try {
-    const equipment = await prisma.equipment.findMany({
-      include: {
-        category: true,
-        maintenance: true,
-        equipment_returns: true,
-        transactions: true,
-      },
-    });
+    // Dapatkan cookie admin dan user
+    const adminCookie = getCookie(event, "admin");
+    const userCookie = getCookie(event, "user");
 
-    if (!equipment) {
-      return createError({
-        statusCode: 404,
-        message: "No equipment found",
+    // Parse cookie jika ada
+    const adminData = adminCookie ? JSON.parse(adminCookie) : null;
+    const userData = userCookie ? JSON.parse(userCookie) : null;
+
+    // Cek apakah user atau admin yang terautentikasi
+    const isAdmin = adminData && adminData.isLoggedIn;
+    const isUser = userData && userData.isLoggedIn;
+
+    if (isAdmin || isUser) {
+      const equipment = await prisma.equipment.findMany({
+        include: {
+          category: true,
+          maintenance: true,
+          equipment_returns: true,
+          transactions: true,
+        },
       });
-    }
 
-    return {
-      statusCode: 200,
-      message: "Equipment fetched successfully",
-      data: equipment,
-    };
+      if (!equipment) {
+        return createError({
+          statusCode: 404,
+          message: "No equipment found",
+        });
+      }
+
+      return {
+        statusCode: 200,
+        message: "Equipment fetched successfully",
+        data: equipment,
+      };
+    } else {
+      return {
+        statusCode: 401,
+        message: "Unauthorized: Login required",
+      };
+    }
   } catch (error) {
     throw createError({
       statusCode: 500,

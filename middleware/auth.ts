@@ -1,13 +1,14 @@
 export default defineNuxtRouteMiddleware((to, from) => {
   const userStore = useUserStore();
 
-  if (to.path.startsWith("/admin")) {
+  if (!to.path.startsWith("/")) {
     return;
   }
 
   // Mendapatkan path saat ini
-  const authPath = ["/login", "/register"];
-  const isAuthPath = authPath.includes(to.path);
+  const isLoginPath = to.path === "/login" || to.path === "/login/";
+  const isRegisterPath = to.path === "/register" || to.path === "/register/";
+  const isAuthPath = isLoginPath || isRegisterPath;
 
   // Cek apakah user sudah login
   // Jika belum login dan mencoba akses halaman yang membutuhkan auth

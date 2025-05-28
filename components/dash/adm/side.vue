@@ -34,6 +34,11 @@ const sidenav = ref([
     route: "/admin/equipment",
   },
   {
+    icon: "i-solar:sledgehammer-bold",
+    label: "Pemeliharaan",
+    route: "/admin/maintenance",
+  },
+  {
     icon: "i-material-symbols:category",
     label: "Kategori",
     route: "/admin/category",

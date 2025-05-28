@@ -93,7 +93,8 @@ export default defineEventHandler(async (event) => {
     });
 
     return {
-      status: "success",
+      statusCode: 200,
+      message: "success",
       data: transactions,
     };
   } catch (error) {

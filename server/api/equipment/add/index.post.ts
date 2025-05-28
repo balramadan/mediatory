@@ -2,8 +2,11 @@ import prisma from "~/lib/prisma";
 import { ulid } from "ulid";
 
 export default defineEventHandler(async (event) => {
-  const adminStore = getCookie(event, "admin");
-  if (!adminStore) {
+  const adminCookie = getCookie(event, "admin");
+  const adminData = adminCookie ? JSON.parse(adminCookie) : null;
+
+  const isAdmin = adminData && adminData.isLoggedIn;
+  if (!isAdmin) {
     return {
       statusCode: 401,
       message: "Unauthorized",

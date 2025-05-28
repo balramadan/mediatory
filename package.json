@@ -12,6 +12,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.817.0",
     "@iconify-json/material-symbols": "^1.2.20",
     "@iconify-json/solar": "^1.2.2",
     "@iconify/types": "^2.0.0",
@@ -21,12 +22,13 @@
     "@primeuix/themes": "^1.0.3",
     "@primevue/core": "^4.3.4",
     "@primevue/forms": "^4.3.3",
-    "@primevue/nuxt-module": "4.3.3",
     "@prisma/client": "6.6.0",
     "bcrypt": "^5.1.1",
     "chart.js": "^4.4.9",
+    "cron": "^4.3.0",
     "eslint": "^9.25.1",
     "js-cookie": "^3.0.5",
+    "nodemailer": "^7.0.3",
     "pinia": "^3.0.2",
     "pinia-plugin-persistedstate": "^4.2.0",
     "primevue": "^4.3.3",
@@ -35,15 +37,16 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@primevue/nuxt-module": "4.3.4",
     "@types/bcrypt": "^5.0.2",
     "@types/js-cookie": "^3.0.6",
-    "@unocss/nuxt": "66.1.0-beta.12",
+    "@unocss/nuxt": "66.1.2",
     "@vueuse/nuxt": "13.1.0",
-    "nuxt": "^3.17.2",
+    "nuxt": "^3.17.3",
     "prisma": "6.6.0",
     "typescript": "^5.8.3",
     "ulid": "^3.0.0",
-    "unocss": "66.1.0-beta.12"
+    "unocss": "66.1.2"
   },
   "ignoredBuiltDependencies": [
     "@prisma/client",

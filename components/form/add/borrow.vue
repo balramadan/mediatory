@@ -47,7 +47,12 @@
             </div>
           </div>
           <div class="py-6">
-            <Button v-if="isFormValid" severity="contrast" label="Next" @click="activateCallback('2')" />
+            <Button
+              v-if="isFormValid"
+              severity="contrast"
+              label="Next"
+              @click="activateCallback('2')"
+            />
           </div>
         </StepPanel>
       </StepItem>
@@ -63,8 +68,17 @@
             </div>
           </div>
           <div class="flex py-6 gap-2">
-            <Button label="Back" severity="secondary" @click="activateCallback('1')" />
-            <Button v-if="checked" type="submit" severity="contrast" label="Pinjam" />
+            <Button
+              label="Back"
+              severity="secondary"
+              @click="activateCallback('1')"
+            />
+            <Button
+              v-if="checked"
+              type="submit"
+              severity="contrast"
+              label="Pinjam"
+            />
           </div>
         </StepPanel>
       </StepItem>
@@ -73,7 +87,7 @@
 </template>
 
 <script lang="ts" setup>
-const toast = useToast()
+const toast = useToast();
 
 const userStore = useUserStore();
 const cart = useCartStore();
@@ -130,11 +144,7 @@ const isFormValid = computed(() => {
 
 function formatDate(date: any) {
   if (!date) return "-";
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(date);
+  return date.toISOString();
 }
 
 function calculateReturnDate() {
@@ -146,14 +156,22 @@ function calculateReturnDate() {
 }
 
 const addBorrow = async () => {
-  await $fetch('/api/borrow/add', {
+  const formattedBorrowDate = borrowDate.value
+    ? new Date(borrowDate.value).toISOString()
+    : null;
+  const returnDateCalculated = calculateReturnDate();
+  const formattedReturnDate = returnDateCalculated
+    ? returnDateCalculated.toISOString()
+    : null;
+
+  await $fetch("/api/borrow/add", {
     method: "POST",
     body: {
       user_id: userStore.user.id,
       project: project.value,
       purpose: purpose.value,
-      borrow_date: formatDate(borrowDate.value),
-      return_date: formatDate(calculateReturnDate()),
+      borrow_date: formattedBorrowDate,
+      return_date: formattedReturnDate,
       equipments: cart.cart.map((item) => ({
         equipment_id: item.equipment_id,
         quantity: item.quantity,
@@ -168,6 +186,9 @@ const addBorrow = async () => {
         life: 3000,
       });
       cart.clearCart();
+      setTimeout(() => {
+        navigateTo({ path: "/" });
+      }, 3000);
     } else {
       toast.add({
         severity: "error",
@@ -176,8 +197,8 @@ const addBorrow = async () => {
         life: 3000,
       });
     }
-  })
-}
+  });
+};
 
 onMounted(async () => {
   name.value = userStore.user.name;

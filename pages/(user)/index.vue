@@ -1,5 +1,5 @@
 <template>
-  <div class="font-bold text-2xl">
+  <div class="">
     <div class="flex flex-row gap-1">
       <Greeting />
       <DashUserName />
@@ -16,9 +16,9 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: "Home | Mediadesk",
+  title: "Home | Mediawi",
   description: "Welcome to my website",
-  ogTitle: "Home | Mediadesk"
+  ogTitle: "Home | Mediawi"
 });
 </script>
 

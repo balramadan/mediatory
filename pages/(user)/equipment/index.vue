@@ -35,7 +35,9 @@
       <template #empty>
         <p class="text-center">Tidak ada alat yang tersedia</p>
       </template>
+
       <template #loading><p class="text-center">Tunggu...</p></template>
+      
       <Column field="equipment_id" header="ID" class="text-base" />
       <Column field="name" header="Nama Alat" class="text-base w-80" />
       <Column field="status" header="Status Alat" class="text-base">
@@ -181,9 +183,9 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: "Daftar Peralatan | Mediadesk",
+  title: "Daftar Peralatan | Mediawi",
   description: "Daftar Peralatan yang bisa dipinjam",
-  ogTitle: "Daftar Peralatan | Mediadesk",
+  ogTitle: "Daftar Peralatan | Mediawi",
 });
 </script>
 

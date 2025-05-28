@@ -43,6 +43,13 @@
   </div>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+const eqStore = useEquipmentStore();
+const trStore = useTransactionStore();
+
+onMounted(() => {
+
+})
+</script>
 
 <style></style>
