@@ -60,7 +60,6 @@ export const useTransactionStore = defineStore("transaction", {
         method: "PUT",
         credentials: "include",
         body: {
-          transaction_id: id,
           status: "approved",
           verified_notes: notes,
           adminId,
@@ -80,7 +79,6 @@ export const useTransactionStore = defineStore("transaction", {
         method: "PUT",
         credentials: "include",
         body: {
-          transaction_id: id,
           status: "rejected",
           verifed_notes: notes,
           adminId,

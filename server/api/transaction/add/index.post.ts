@@ -1,4 +1,5 @@
 import prisma from "~/lib/prisma";
+import { sendEmail, emailTemplates } from "~/utils/email";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -44,8 +45,8 @@ export default defineEventHandler(async (event) => {
         data: {
           project,
           purpose,
-          borrow_date, // Pastikan format tanggal benar
-          return_date, // Pastikan format tanggal benar
+          borrow_date,
+          return_date,
           user: {
             connect: { user_id },
           },
@@ -86,6 +87,71 @@ export default defineEventHandler(async (event) => {
 
       return borrow;
     });
+
+    // Kirim notifikasi email setelah transaksi berhasil
+    try {
+      // Get user details
+      const user = await prisma.users.findUnique({
+        where: { user_id },
+        select: {
+          full_name: true,
+          email: true,
+        },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Get equipment details for email
+      const equipmentDetails = await Promise.all(
+        equipments.map(async (equipment: any) => {
+          const equip = await prisma.equipment.findUnique({
+            where: { equipment_id: equipment.equipment_id },
+            select: { name: true },
+          });
+          return {
+            name: equip?.name || "Unknown Equipment",
+            quantity: equipment.quantity,
+          };
+        })
+      );
+
+      // Get all admin emails
+      const admins = await prisma.admins.findMany({
+        select: { email: true },
+      });
+
+      // Send email notification to all admins
+      const emailPromises = admins.map(async (admin) => {
+        const template = emailTemplates.borrowRequest(
+          user.full_name,
+          result.transaction_id,
+          equipmentDetails
+        );
+
+        return sendEmail(admin.email, template.subject, template.html);
+      });
+
+      // Wait for all emails to be sent
+      const emailResults = await Promise.allSettled(emailPromises);
+      
+      // Log email results
+      emailResults.forEach((result, index) => {
+        if (result.status === "fulfilled" && result.value.success) {
+          console.log(`Email sent successfully to admin ${index + 1}`);
+        } else {
+          console.error(`Failed to send email to admin ${index + 1}:`, 
+            result.status === "rejected" ? result.reason : result.value.error
+          );
+        }
+      });
+
+    } catch (emailError) {
+      console.error("Error sending email notification:", emailError);
+      // Don't fail the transaction if email fails
+      // Just log the error and continue
+    }
 
     // Kirim respons sukses
     return {

@@ -1,8 +1,6 @@
 <template>
   <div class="">
-    <Toolbar
-      class="flex flex-col md:flex-row md:items-center md:justify-between mb-5"
-    >
+    <Toolbar class="flex flex-col md:flex-row md:items-center md:justify-between mb-5">
       <template #start>
         <Button
           icon="i-material-symbols:add"
@@ -81,6 +79,10 @@
         <p class="text-center">Tidak ada pemeliharaan alat</p>
       </template>
 
+      <template #loading>
+        <ProgressSpinner />
+      </template>
+
       <Column field="id" header="ID" sortable style="min-width: 6rem"></Column>
 
       <Column
@@ -94,19 +96,9 @@
         </template>
       </Column>
 
-      <Column
-        field="quantity"
-        header="Jumlah"
-        sortable
-        style="min-width: 8rem"
-      ></Column>
+      <Column field="quantity" header="Jumlah" sortable style="min-width: 8rem"></Column>
 
-      <Column
-        field="maintenance_type"
-        header="Jenis"
-        sortable
-        style="min-width: 10rem"
-      >
+      <Column field="maintenance_type" header="Jenis" sortable style="min-width: 10rem">
         <template #body="{ data }">
           <Tag :severity="getMaintenanceTypeSeverity(data.maintenance_type)">
             {{ formatMaintenanceType(data.maintenance_type) }}
@@ -114,12 +106,7 @@
         </template>
       </Column>
 
-      <Column
-        field="start_date"
-        header="Tanggal Mulai"
-        sortable
-        style="min-width: 10rem"
-      >
+      <Column field="start_date" header="Tanggal Mulai" sortable style="min-width: 10rem">
         <template #body="{ data }">
           {{ formatDate(data.start_date) }}
         </template>
@@ -149,12 +136,7 @@
         </template>
       </Column>
 
-      <Column
-        field="technician_name"
-        header="Teknisi"
-        sortable
-        style="min-width: 12rem"
-      >
+      <Column field="technician_name" header="Teknisi" sortable style="min-width: 12rem">
         <template #body="{ data }">
           {{ data.technician_name || "Belum ditentukan" }}
         </template>
@@ -176,7 +158,7 @@
           />
           <Button
             v-if="data.status === StatusMaintenance.ongoing"
-            icon="pi pi-check"
+            icon="i-material-symbols:check"
             class="p-button-rounded p-button-success p-button-sm"
             @click="completeMaintenance(data)"
           />
@@ -230,9 +212,7 @@
           <label class="font-bold">Jenis Pemeliharaan</label>
           <div class="mt-1">
             <Tag
-              :severity="
-                getMaintenanceTypeSeverity(selectedMaintenance.maintenance_type)
-              "
+              :severity="getMaintenanceTypeSeverity(selectedMaintenance.maintenance_type)"
             >
               {{ formatMaintenanceType(selectedMaintenance.maintenance_type) }}
             </Tag>
@@ -271,7 +251,7 @@
           </div>
         </div>
 
-        <div class="field mb-4">
+        <div class="flex flex-col mb-5">
           <label class="font-bold">Status</label>
           <div v-if="viewMode" class="mt-1">
             <Tag
@@ -290,7 +270,7 @@
           />
         </div>
 
-        <div class="field mb-4">
+        <div class="flex flex-col mb-5">
           <label class="font-bold">Teknisi</label>
           <div v-if="viewMode" class="mt-1">
             {{ selectedMaintenance.technician_name || "Belum ditentukan" }}
@@ -305,7 +285,7 @@
           </div>
         </div>
 
-        <div class="field mb-4">
+        <div class="flex flex-col mb-5">
           <label class="font-bold">Catatan</label>
           <div v-if="viewMode" class="mt-1 whitespace-pre-line">
             {{ selectedMaintenance.notes || "Tidak ada catatan" }}
@@ -342,11 +322,7 @@
             class="p-button-text"
             @click="closeDetailDialog"
           />
-          <Button
-            label="Simpan"
-            icon="pi pi-check"
-            @click="updateMaintenanceRecord"
-          />
+          <Button label="Simpan" icon="pi pi-check" @click="updateMaintenanceRecord" />
         </div>
       </template>
     </Dialog>
@@ -368,14 +344,12 @@
           >?
         </p>
         <p class="mb-4">
-          Ini akan mengubah status pemeliharaan menjadi "Selesai" dan
-          mengembalikan jumlah unit ke stok yang tersedia.
+          Ini akan mengubah status pemeliharaan menjadi "Selesai" dan mengembalikan jumlah
+          unit ke stok yang tersedia.
         </p>
 
         <div class="field mb-4">
-          <label for="complete-notes" class="font-bold"
-            >Catatan Penyelesaian</label
-          >
+          <label for="complete-notes" class="font-bold">Catatan Penyelesaian</label>
           <Textarea
             id="complete-notes"
             v-model="completeForm.notes"
@@ -406,11 +380,12 @@
 
 <script setup lang="ts">
 import { FilterMatchMode } from "@primevue/core/api";
+import type { MaintenanceType } from "~/types/maintenance";
 
 enum StatusMaintenance {
-  ongoing = 0,
-  completed = 1,
-  cancelled = 2,
+  ongoing = "ongoing",
+  completed = "completed",
+  cancelled = "cancelled",
 }
 
 const maintenanceStore = useMaintenanceStore();
@@ -448,8 +423,6 @@ const completeForm = reactive({
 });
 
 const selectedMaintenance = ref<any>(null);
-
-type MaintenanceType = "repair" | "cleaning" | "calibration" | "inspection";
 
 // Options
 const statusOptions = [
@@ -638,7 +611,7 @@ const formatStatus = (status: string) => {
     [StatusMaintenance.cancelled]: "Dibatalkan",
   };
   return status in statusMap
-    ? statusMap[status as unknown as StatusMaintenance]
+    ? statusMap[(status as unknown) as StatusMaintenance]
     : status;
 };
 

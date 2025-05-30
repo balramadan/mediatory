@@ -6,12 +6,12 @@
       <NuxtImg src="/logowi.png" height="30" />
     </div>
     <div class="flex flex-row items-center gap-2">
-      <div
-        class="border border-solid border-black p-1 rounded-full"
-        sm="rounded"
-      >
-        <div class="i-material-symbols:person text-black w-6 h-6 p-2" />
-      </div>
+      <Avatar
+        :label="getInitials(userName)"
+        shape="circle"
+        size="normal"
+        style="background-color: #C74375; color: #fff"
+      />
       <div class="hidden" sm="flex flex-row items-center gap-1">
         <div sm="flex flex-col gap-0.2">
           <h2 class="text-xs text-fuchsia-600 font-bold">{{ userName }}</h2>
@@ -55,7 +55,7 @@
   </Menu>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 const userId = ref("")
 const userName = ref("")
 const userPhone = ref("")
@@ -68,6 +68,16 @@ onMounted(() => {
   userName.value = store.user.name
   userPhone.value = store.user.phone
 })
+
+const getInitials = (name: string) => {
+  if (!name) return '?';
+  return name
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+};
 
 const pop = ref();
 const items = ref([
@@ -82,7 +92,7 @@ const items = ref([
     route: "/logout",
   },
 ]);
-const toggle = (event) => {
+const toggle = (event: any) => {
   pop.value.toggle(event);
 };
 </script>

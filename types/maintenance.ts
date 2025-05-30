@@ -1,0 +1,1 @@
+export type MaintenanceType = "repair" | "cleaning" | "calibration" | "inspection";

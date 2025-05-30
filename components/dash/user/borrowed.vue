@@ -5,19 +5,23 @@
       show-gridlines
       striped-rows
       paginator
-      class="rounded shadow-sm"
+      class="rounded"
       :value="borrowed"
+      :loading="loading"
       :rows="6"
     >
       <template #header>
         <h2 class="font-bold text-base">Peminjaman Terkini</h2>
       </template>
+
       <template #empty>
         <p class="text-base font-normal text-center">
           Tidak ada alat yang dipinjam
         </p>
       </template>
-      <template #loading> Tunggu sebentar... </template>
+
+      <template #loading><ProgressSpinner /></template>
+
       <Column header="No" class="text-base font-normal w-16">
         <template #body="slotProps">
           <div>{{ slotProps.index + 1 }}</div>
@@ -124,7 +128,7 @@
             rounded
             class="mb-2"
             @click.prevent="
-              navigateTo(`/transaction/${slotProps.data.transaction_id}`)
+              $router.push(`/transaction/${slotProps.data.transaction_id}`)
             "
           />
         </template>
@@ -137,19 +141,21 @@
 const userStore = useUserStore();
 const toast = useToast();
 
+const loading = ref(false);
 const dt = ref();
 const borrowed = ref();
 
 const trUser = async () => {
+  loading.value = true;
   const userId = userStore.user.id;
 
-  await $fetch(`/api/borrow?byUser=${userId}`, {
+  await $fetch(`/api/transaction?byUser=${userId}`, {
     method: "GET",
     credentials: "include",
   })
-    .then((res) => {
+    .then((res: any) => {
       if (res.statusCode === 200) {
-        borrowed.value = res.data;
+        borrowed.value = res.data.filter((item: any) => item.status !== "completed");
       }
     })
     .catch((err) => {
@@ -159,7 +165,8 @@ const trUser = async () => {
         detail: `Gagal mendapatkan data peminjaman ${err}`,
         life: 3000,
       });
-    });
+    })
+    .finally(() => (loading.value = false));
 };
 
 onMounted(async () => {

@@ -3,8 +3,12 @@
     <DataTable>
       <template #header>
         <div class="flex flex-wrap justify-between items-center gap-5">
-          <h2 class="font-bold">Tabel Peminjaman Terkini</h2>
-          <Button icon="i-solar:export-bold" label="Export" type="button" severity="contrast" size="small" />
+          <h2 class="font-bold font-poppins">Tabel Peminjaman Terkini</h2>
+          <Button
+            label="Export"
+            icon="i-material-symbols:upload"
+            severity="secondary"
+          />
         </div>
       </template>
       <Column header="ID" />
@@ -17,8 +21,6 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-
-</script>
+<script lang="ts" setup></script>
 
 <style></style>

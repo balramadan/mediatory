@@ -15,7 +15,62 @@ export default defineEventHandler(async (event) => {
     const isUser = userData && userData.isLoggedIn;
 
     if (isAdmin || isUser) {
+      const { q, byUser, status, category } = getQuery(event);
+
+      // Kondisi dasar untuk query
+      const whereCondition: any = {};
+
+      // Filter pencarian (search query)
+      if (q) {
+        whereCondition.OR = [
+          // Pencarian berdasarkan nama user
+          {
+            user: {
+              full_name: {
+                contains: String(q),
+                mode: "insensitive",
+              },
+            },
+          },
+          // Pencarian berdasarkan nama equipment di dalam transaksi
+          {
+            equipments: {
+              some: {
+                equipment: {
+                  name: {
+                    contains: String(q),
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          },
+        ];
+      }
+
+      // Filter berdasarkan user ID
+      if (byUser) {
+        whereCondition.user_id = String(byUser);
+      }
+
+      // Filter berdasarkan status transaksi
+      if (status) {
+        whereCondition.status = String(status);
+      }
+
+      // Filter berdasarkan kategori equipment
+      if (category) {
+        whereCondition.equipments = {
+          some: {
+            equipment: {
+              category_id: parseInt(String(category)),
+            },
+          },
+        };
+      }
+
       const transactions = await prisma.transactions.findMany({
+        where: whereCondition,
         include: {
           admin: true,
           user: true,

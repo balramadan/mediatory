@@ -37,6 +37,7 @@
       striped-rows
       paginator
       :value="equipment"
+      :loading="loading"
       :rows="6"
       :globalFilterFields="['name', 'status', 'category.category_name']"
     >
@@ -47,14 +48,20 @@
             <InputIcon>
               <div class="i-material-symbols:search" />
             </InputIcon>
-            <InputText v-model="filters['global'].value" placeholder="Search..." />
+            <InputText
+              v-model="filters['global'].value"
+              placeholder="Search..."
+            />
           </IconField>
         </div>
       </template>
+
       <template #empty>
         <p class="text-center">Belum ada peralatan</p>
       </template>
-      <template #loading><p class="text-center">Tunggu...</p></template>
+
+      <template #loading><ProgressSpinner /></template>
+
       <Column
         selection-mode="multiple"
         style="width: 3rem"
@@ -204,6 +211,7 @@ const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 
+const loading = ref(false);
 const dt = ref();
 const equipment = ref();
 const equipmentId = ref();
@@ -219,7 +227,8 @@ const refreshEquipment = async () => {
 };
 
 onMounted(async () => {
-  refreshEquipment();
+  loading.value = true;
+  refreshEquipment().finally(() => (loading.value = false));
 });
 
 const openNew = () => {
@@ -294,7 +303,7 @@ const confirmDeleteEquipment = (eq: Equipment) => {
 };
 
 const deleteEquipment = async () => {
-  console.log(equipmentId.value)
+  console.log(equipmentId.value);
 
   await $fetch("/api/equipment/delete?multiple=false", {
     method: "DELETE",

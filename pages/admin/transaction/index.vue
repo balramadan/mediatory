@@ -16,9 +16,14 @@
       show-gridlines
       striped-rows
       paginator
-      :rows="6"
       :value="transactions"
-      :globalFilterFields="['user.full_name', 'equipments.equipment.name', 'status']"
+      :loading="loading"
+      :rows="6"
+      :globalFilterFields="[
+        'user.full_name',
+        'equipments.equipment.name',
+        'status',
+      ]"
     >
       <template #header>
         <div class="flex flex-wrap justify-between items-center gap-5">
@@ -27,7 +32,10 @@
             <InputIcon>
               <div class="i-material-symbols:search" />
             </InputIcon>
-            <InputText v-model="filters['global'].value" placeholder="Search..." />
+            <InputText
+              v-model="filters['global'].value"
+              placeholder="Search..."
+            />
           </IconField>
         </div>
       </template>
@@ -35,8 +43,9 @@
       <template #empty>
         <p class="text-center">Belum ada transaksi</p>
       </template>
-      
-      <template #loading><p class="text-center">Tunggu...</p></template>
+
+      <template #loading><ProgressSpinner /></template>
+
       <Column field="transaction_id" header="ID"></Column>
       <Column field="user.full_name" header="Nama"></Column>
       <Column field="project" header="Proyek"></Column>
@@ -147,7 +156,9 @@
             rounded
             class="mb-2"
             @click.prevent="
-              navigateTo(`/admin/transaction/${slotProps.data.transaction_id}`)
+              $router.push(
+                `/admin/transaction/${slotProps.data.transaction_id}`
+              )
             "
           />
         </template>
@@ -166,8 +177,10 @@ const filters = ref({
 
 const dt = ref();
 const transactions = ref();
+const loading = ref(false);
 
 onMounted(async () => {
+  loading.value = true;
   await trStore
     .getAllTransaction()
     .then(() => {
@@ -175,6 +188,9 @@ onMounted(async () => {
     })
     .catch((err) => {
       console.error(err);
+    })
+    .finally(() => {
+      loading.value = false;
     });
 });
 

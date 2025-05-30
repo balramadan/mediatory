@@ -1,5 +1,16 @@
 <template>
   <div>
+    <Toolbar class="mb-5">
+      <template #end>
+        <Button
+              icon="i-material-symbols:refresh"
+              label="Refresh"
+              severity="secondary"
+              @click="refreshData"
+            />
+      </template>
+    </Toolbar>
+    
     <DataTable
       ref="dt"
       v-model:filters="filters"
@@ -12,7 +23,6 @@
       :loading="loading"
       filterDisplay="menu"
       :globalFilterFields="['full_name', 'email', 'phone']"
-      class="shadow-sm"
     >
       <template #header>
         <div class="flex flex-wrap justify-between items-center gap-5">
@@ -28,12 +38,7 @@
                 class="w-64"
               />
             </IconField>
-            <Button
-              icon="i-material-symbols:refresh"
-              label="Refresh"
-              severity="secondary"
-              @click="refreshData"
-            />
+            
           </div>
         </div>
       </template>
@@ -69,7 +74,7 @@
               :label="getInitials(slotProps.data.full_name)"
               shape="circle"
               size="normal"
-              style="background-color: #fdd835; color: #333"
+              style="background-color: #C74375; color: #fff"
             />
             <div>
               <div class="font-semibold">{{ slotProps.data.full_name }}</div>
@@ -166,7 +171,7 @@
             :label="getInitials(selectedUser.full_name)"
             size="xlarge"
             shape="circle"
-            style="background-color: #fdd835; color: #333"
+            style="background-color: #C74375; color: #fff"
             class="mb-3"
           />
           <h3 class="text-xl font-semibold">{{ selectedUser.full_name }}</h3>

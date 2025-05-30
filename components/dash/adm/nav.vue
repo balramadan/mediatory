@@ -25,7 +25,7 @@
         :label="getInitials(adminName)"
         shape="circle"
         size="normal"
-        style="background-color: #fdd835; color: #333"
+        style="background-color: #C74375; color: #fff"
       />
       <div class="hidden" sm="flex flex-row items-center gap-1">
         <div sm="flex flex-col gap-0.2">

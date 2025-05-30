@@ -1,4 +1,5 @@
 import prisma from "~/lib/prisma";
+import { sendEmail, emailTemplates } from '~/utils/email';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -15,11 +16,12 @@ export default defineEventHandler(async (event) => {
     const isUser = userData && userData.isLoggedIn;
 
     if (isAdmin || isUser) {
+      const id = parseInt(getRouterParam(event, "id") || "0");
       const body = await readBody(event);
-      const { transaction_id, status, verified_notes, adminId } = body;
+      const { status, verified_notes, adminId } = body;
 
       // Validasi input
-      if (!transaction_id || !status) {
+      if (!status) {
         return {
           statusCode: 400,
           message: "Bad Request: Missing required fields",
@@ -30,7 +32,7 @@ export default defineEventHandler(async (event) => {
       if (status === "approved") {
         const updateTransaction = await prisma.transactions.update({
           where: {
-            transaction_id,
+            transaction_id: id,
           },
           data: {
             status,
@@ -42,6 +44,14 @@ export default defineEventHandler(async (event) => {
               },
             },
           },
+          include: {
+            user: true,
+            equipments: {
+              include: {
+                equipment: true
+              }
+            }
+          }
         });
 
         if (!updateTransaction) {
@@ -51,14 +61,33 @@ export default defineEventHandler(async (event) => {
           };
         }
 
+        // Send approval email to user
+        try {
+          const itemDetails = updateTransaction.equipments.map(eq => ({
+            name: eq.equipment.name,
+            quantity: eq.quantity
+          }));
+
+          const template = emailTemplates.borrowApproved(
+            updateTransaction.user.full_name,
+            updateTransaction.transaction_id,
+            itemDetails
+          );
+
+          await sendEmail(updateTransaction.user.email, template.subject, template.html);
+        } catch (emailError) {
+          console.error('Failed to send approval email:', emailError);
+          // Don't fail the transaction if email fails
+        }
+
         return {
           statusCode: 200,
-          message: "Transaction updated successfully",
+          message: "Transaction approved successfully and email sent to user",
         };
       } else if (status === "rejected") {
         const updateTransaction = await prisma.transactions.update({
           where: {
-            transaction_id,
+            transaction_id: id,
           },
           data: {
             status,
@@ -70,6 +99,14 @@ export default defineEventHandler(async (event) => {
               },
             },
           },
+          include: {
+            user: true,
+            equipments: {
+              include: {
+                equipment: true
+              }
+            }
+          }
         });
 
         if (!updateTransaction) {
@@ -83,7 +120,7 @@ export default defineEventHandler(async (event) => {
         const transactionEquipments =
           await prisma.transactionEquipment.findMany({
             where: {
-              transaction_id: parseInt(transaction_id),
+              transaction_id: id,
             },
             include: {
               equipment: true,
@@ -104,14 +141,28 @@ export default defineEventHandler(async (event) => {
           });
         }
 
+        // Send rejection email to user
+        try {
+          const template = emailTemplates.borrowRejected(
+            updateTransaction.user.full_name,
+            updateTransaction.transaction_id,
+            verified_notes || 'Tidak ada alasan yang diberikan'
+          );
+
+          await sendEmail(updateTransaction.user.email, template.subject, template.html);
+        } catch (emailError) {
+          console.error('Failed to send rejection email:', emailError);
+          // Don't fail the transaction if email fails
+        }
+
         return {
           statusCode: 200,
-          message: "Transaction rejected and equipment quantities restored",
+          message: "Transaction rejected, equipment quantities restored, and email sent to user",
         };
       } else if (status === "canceled") {
         const updateTransaction = await prisma.transactions.update({
           where: {
-            transaction_id,
+            transaction_id: id,
           },
           data: {
             status,
@@ -129,7 +180,7 @@ export default defineEventHandler(async (event) => {
         const transactionEquipments =
           await prisma.transactionEquipment.findMany({
             where: {
-              transaction_id: parseInt(transaction_id),
+              transaction_id: id,
             },
             include: {
               equipment: true,
@@ -157,6 +208,7 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (error) {
+    console.error('Error in transaction update:', error);
     throw createError({
       statusCode: 500,
       message: "Internal Server Error",

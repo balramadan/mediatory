@@ -164,7 +164,7 @@ const addBorrow = async () => {
     ? returnDateCalculated.toISOString()
     : null;
 
-  await $fetch("/api/borrow/add", {
+  await $fetch("/api/transaction/add", {
     method: "POST",
     body: {
       user_id: userStore.user.id,

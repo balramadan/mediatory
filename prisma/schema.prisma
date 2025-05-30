@@ -22,6 +22,7 @@ model users {
   password  String
   phone     String
   status    StatusUser @default(inactive)
+  imgUrl    String?
   createdAt DateTime   @default(now())
 
   transactions transactions[]
@@ -34,6 +35,7 @@ model admins {
   password   String
   role       RoleAdmin @default(inventory)
   last_login DateTime?
+  imgUrl     String?
   createdAt  DateTime  @default(now())
 
   verified_transactions transactions[]         @relation("borrowVerification")
@@ -47,6 +49,7 @@ model equipment {
   quantity           Int
   available_quantity Int
   status             StatusEquipment @default(available)
+  imgUrl             String?
   createdAt          DateTime        @default(now())
 
   category_id Int

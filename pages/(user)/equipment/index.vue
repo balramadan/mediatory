@@ -6,7 +6,7 @@
           <Button
             icon="i-material-symbols:shopping-cart"
             severity="secondary"
-            @click="navigateTo('/cart')"
+            @click.prevent="$router.push('/cart')"
           />
         </OverlayBadge>
       </template>
@@ -19,6 +19,7 @@
       paginator
       data-key="equipment_id"
       :value="equipment"
+      :loading="loading"
       :rows="6"
     >
       <template #header>
@@ -36,8 +37,8 @@
         <p class="text-center">Tidak ada alat yang tersedia</p>
       </template>
 
-      <template #loading><p class="text-center">Tunggu...</p></template>
-      
+      <template #loading><ProgressSpinner /></template>
+
       <Column field="equipment_id" header="ID" class="text-base" />
       <Column field="name" header="Nama Alat" class="text-base w-80" />
       <Column field="status" header="Status Alat" class="text-base">
@@ -135,6 +136,7 @@ const toast = useToast();
 const eqStore = useEquipmentStore();
 const cartStore = useCartStore();
 
+const loading = ref(false)
 const dt = ref();
 const equipment = ref();
 const addEquipment = ref();
@@ -143,7 +145,10 @@ const addToCartDialog = ref(false);
 // const borrowDialog = ref(false);
 
 const refreshEquipment = async () => {
-  await eqStore.getEquipment();
+  loading.value = true;
+  await eqStore.getEquipment().finally(() => {
+    loading.value = false;
+  });
   equipment.value = eqStore.equipment;
 };
 
