@@ -1,6 +1,6 @@
 <template>
-  <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-8 flex flex-col gap-5">
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+    <div class="md:col-span-8 flex flex-col gap-5">
       <div class="bg-white rounded shadow-sm py-5 px-5">
         <h2 class="font-bold text-lg">Detail Peminjaman</h2>
         <Divider />
@@ -41,18 +41,40 @@
                 class="flex flex-row items-center justify-between py-2.5 px-2.5 rounded border-0.2 border-slate-400"
                 :key="index"
               >
-                <div class="">
-                  <p class="font-semibold">{{ item.equipment.name }}</p>
-                  <p class="text-sm">
-                    {{ item.equipment.category.category_name }}
-                  </p>
+                <div class="flex flex-row gap-2.5 items-center">
+                  <Image v-if="item.equipment.imgUrl" preview>
+                    <template #image>
+                      <NuxtImg
+                        :src="item.equipment.imgUrl"
+                        :alt="item.equipment.name"
+                        class="w-16 h-16 object-cover rounded"
+                      />
+                    </template>
+                    <template #preview="{ style, previewCallback }">
+                      <NuxtImg
+                        :src="item.equipment.imgUrl"
+                        :alt="item.equipment.name"
+                        :style="style"
+                        @click="previewCallback"
+                      />
+                    </template>
+                  </Image>
+                  <span v-else class="text-gray-400">No image</span>
+                  <div class="">
+                    <p class="font-semibold">{{ item.equipment.name }}</p>
+                    <p class="text-sm">
+                      {{ item.equipment.category.category_name }}
+                    </p>
+                  </div>
                 </div>
+
                 <p>Jumlah: {{ item.quantity }}</p>
               </div>
             </div>
           </div>
         </div>
       </div>
+
       <div class="bg-white rounded shadow-sm py-2.5 px-5">
         <h2 class="font-semibold">Log Status</h2>
         <Divider />
@@ -95,7 +117,9 @@
         </div>
       </div>
     </div>
-    <div class="col-span-4 flex flex-col gap-5">
+
+    <!-- Card Data Diri -->
+    <div class="md:col-span-4 flex flex-col gap-5">
       <div id="detailUser" class="bg-white rounded shadow-sm py-2.5 px-2.5">
         <h2 class="font-semibold">Data Diri</h2>
         <Divider />
@@ -113,6 +137,48 @@
       </div>
 
       <!-- Card Keputusan -->
+      <div v-if="transaction?.admin_id">
+        <div class="bg-white rounded shadow-sm py-2.5 px-2.5 mb-5">
+          <h2 class="font-semibold">Peminjaman Diverifikasi</h2>
+          <Divider />
+          <h3 class="font-bold text-blue-500">
+            {{ transaction?.admin?.full_name || "Admin tidak ditemukan" }}
+          </h3>
+          <div class="flex flex-row items-center gap-1">
+            <div class="i-material-symbols:mail text-slate-400"></div>
+            <p class="text-slate-400 text-sm">
+              {{ transaction?.admin?.email || "-" }}
+            </p>
+          </div>
+        </div>
+
+        <div
+          v-if="transaction?.return_admin_id"
+          class="bg-white rounded shadow-sm py-2.5 px-2.5 mb-5"
+        >
+          <h2 class="font-semibold">Admin Verifikasi Pengembalian</h2>
+          <Divider />
+          <h3 class="font-bold text-green-500">
+            {{
+              transaction?.return_admin?.full_name || "Admin tidak ditemukan"
+            }}
+          </h3>
+          <div class="flex flex-row items-center gap-1">
+            <div class="i-material-symbols:mail text-slate-400"></div>
+            <p class="text-slate-400 text-sm">
+              {{ transaction?.return_admin?.email || "-" }}
+            </p>
+          </div>
+          <div class="flex flex-row items-center gap-1">
+            <div class="i-material-symbols:phone-enabled text-slate-400"></div>
+            <p class="text-slate-400 text-sm">
+              {{ transaction?.return_admin?.phone || "-" }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pembatalan -->
       <div
         v-if="transaction?.status === 'pending'"
         class="bg-white rounded shadow-sm py-2.5 px-2.5"
@@ -130,7 +196,11 @@
       </div>
 
       <div
-        v-if="transaction?.return_status === 'not_returned'"
+        v-if="
+          transaction?.status === 'approved' &&
+          transaction?.return_status === 'not_returned' &&
+          new Date() >= new Date(transaction?.borrow_date)
+        "
         class="bg-white rounded shadow-sm py-2.5 px-2.5"
       >
         <h2 class="font-semibold">Keputusan</h2>
@@ -244,7 +314,7 @@ const returned = async () => {
         summary: "Berhasil",
         detail: "Pengembalian alat akan di cek admin",
         life: 3000,
-      })
+      });
       await refreshTransaction();
       log.value = constructTransactionLog(transaction?.value);
       returnConfirmDialog.value = false;

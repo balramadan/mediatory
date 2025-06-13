@@ -37,11 +37,36 @@
         <p class="text-center">Tidak ada alat yang tersedia</p>
       </template>
 
-      <template #loading><ProgressSpinner /></template>
+      <template #loading
+        ><LoadingVideo src="/loading.webm" :width="256" :height="256"
+      /></template>
 
-      <Column field="equipment_id" header="ID" class="text-base" />
-      <Column field="name" header="Nama Alat" class="text-base w-80" />
-      <Column field="status" header="Status Alat" class="text-base">
+      <Column field="imgUrl">
+        <template #body="slotProps">
+          <Image v-if="slotProps.data.imgUrl" preview>
+            <template #image>
+              <NuxtImg
+                :src="slotProps.data.imgUrl"
+                :alt="slotProps.data.name"
+                class="w-16 h-16 object-cover rounded"
+              />
+            </template>
+            <template #preview="{ style, previewCallback }">
+              <NuxtImg
+                :src="slotProps.data.imgUrl"
+                :alt="slotProps.data.name"
+                :style="style"
+                @click="previewCallback"
+              />
+            </template>
+          </Image>
+          <span v-else class="text-gray-400">No image</span>
+        </template>
+      </Column>
+
+      <Column field="name" header="Nama Alat" sortable class="text-base w-80" />
+
+      <Column field="status" header="Status Alat" sortable class="text-base">
         <template #body="slotProps">
           <span
             v-if="slotProps.data.available_quantity === 0"
@@ -60,16 +85,21 @@
           >
         </template>
       </Column>
+
       <Column
         field="available_quantity"
         header="Jumlah Tersedia"
+        sortable
         class="text-base"
       />
+
       <Column
         field="category.category_name"
         header="Kategori"
+        sortable
         class="text-base"
       />
+
       <Column :exportable="false" style="min-width: 5rem">
         <template #body="slotProps">
           <Button
@@ -136,7 +166,7 @@ const toast = useToast();
 const eqStore = useEquipmentStore();
 const cartStore = useCartStore();
 
-const loading = ref(false)
+const loading = ref(false);
 const dt = ref();
 const equipment = ref();
 const addEquipment = ref();
@@ -173,6 +203,7 @@ const addToCart = () => {
     available_quantity: addEquipment.value.available_quantity,
     status: addEquipment.value.status,
     category: addEquipment.value.category,
+    imgUrl: addEquipment.value.imgUrl,
     createdAt: addEquipment.value.createdAt,
     transactions: addEquipment.value.transactions,
     maintenance: addEquipment.value.maintenance,

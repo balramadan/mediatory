@@ -19,7 +19,7 @@
       class="bg-green-200 w-full rounded shadow-xs px-5 py-2.5 flex flex-row items-center"
     >
       <div class="w-3/5">
-        <h3 class="text-xs">Sedang Dipinjam</h3>
+        <h3 class="text-xs">Di Pinjam/Di Booking </h3>
         <p class="text-2xl font-bold">{{ stats.active }}</p>
       </div>
       <Divider class="w-1/5" layout="vertical" />

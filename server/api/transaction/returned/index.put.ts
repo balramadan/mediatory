@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
         }
 
         return {
-          status: 200,
+          statusCode: 200,
           message: "Transaction updated successfully",
         };
       }

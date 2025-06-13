@@ -9,6 +9,7 @@ export const useAdminStore = defineStore("admin", {
       name: "",
       email: "",
       role: "",
+      imgUrl: "",
     },
   }),
   actions: {
@@ -19,6 +20,7 @@ export const useAdminStore = defineStore("admin", {
         name: adminData.full_name ?? "",
         email: adminData.email ?? "",
         role: adminData.role ?? "",
+        imgUrl: adminData.imgUrl ?? "",
       };
     },
     logout() {
@@ -28,6 +30,7 @@ export const useAdminStore = defineStore("admin", {
         name: "",
         email: "",
         role: "",
+        imgUrl: "",
       };
 
       const cookies = useCookie("admin");

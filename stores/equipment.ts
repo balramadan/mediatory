@@ -9,6 +9,7 @@ export const useEquipmentStore = defineStore("equipment", {
         quantity: 0,
         available_quantity: 0,
         status: "",
+        imgUrl: "",
         createdAt: "",
         category: {
           category_id: 0,
@@ -23,30 +24,37 @@ export const useEquipmentStore = defineStore("equipment", {
   }),
   actions: {
     async getEquipment() {
-      const { data } = await $fetch("/api/equipment", {
-        method: "get",
-      });
+      await $fetch("/api/equipment", {
+        method: "GET",
+        credentials: "include",
+      })
+        .then((res: any) => {
+          if (res.data && Array.isArray(res.data)) {
+            // Clear the equipment array before filling it with new data
+            this.equipment = [];
 
-      if (data && Array.isArray(data)) {
-        // Clear the equipment array before filling it with new data
-        this.equipment = [];
-
-        // Iterate through the equipment data and add it to the state
-        data.forEach((item) => {
-          this.equipment.push({
-            equipment_id: item.equipment_id.toString(),
-            name: item.name,
-            quantity: item.quantity,
-            available_quantity: item.available_quantity,
-            status: item.status,
-            createdAt: item.createdAt,
-            category: item.category,
-            transactions: item.transactions,
-            equipment_returns: item.equipment_returns,
-            maintenance: item.maintenance,
-          });
+            // Iterate through the equipment data and add it to the state
+            res.data.forEach((item: any) => {
+              this.equipment.push({
+                equipment_id: item.equipment_id.toString(),
+                name: item.name,
+                quantity: item.quantity,
+                available_quantity: item.available_quantity,
+                status: item.status,
+                imgUrl: item.imgUrl,
+                createdAt: item.createdAt,
+                category: item.category,
+                transactions: item.transactions,
+                equipment_returns: item.equipment_returns,
+                maintenance: item.maintenance,
+              });
+            });
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching equipment:", err);
+          this.equipment = []; // Reset equipment to an empty array on error
         });
-      }
     },
   },
 });

@@ -8,15 +8,20 @@
         v-tooltip.right="item.label"
         :class="[
           item.icon,
-          'w-24px h-24px p-2 text-black opacity-30 cursor-pointer transition-all ease-in-out duration-300',
+          'w-24px h-24px p-2 cursor-pointer transition-all ease-in-out duration-300',
+          $route.path === item.route
+            ? 'text-fuchsia-600 opacity-100'
+            : 'text-black opacity-30',
         ]"
-        hover="text-fuchsia-600 opacity-100"
+        hover="text-fuchsia-200 opacity-100"
       />
     </NuxtLink>
   </div>
 </template>
 
 <script lang="ts" setup>
+const adminStore = useAdminStore();
+
 const sidenav = ref([
   {
     icon: "i-material-symbols:dashboard",
@@ -34,7 +39,7 @@ const sidenav = ref([
     route: "/admin/equipment",
   },
   {
-    icon: "i-solar:sledgehammer-bold",
+    icon: "i-material-symbols:build",
     label: "Pemeliharaan",
     route: "/admin/maintenance",
   },
@@ -48,11 +53,15 @@ const sidenav = ref([
     label: "List User",
     route: "/admin/users",
   },
-  {
-    icon: "i-material-symbols:person-shield",
-    label: "List Admin",
-    route: "/admin/list",
-  },
+  ...(adminStore.admin.role === "superadmin"
+    ? [
+        {
+          icon: "i-material-symbols:person-shield",
+          label: "List Admin",
+          route: "/admin/list",
+        },
+      ]
+    : []),
 ]);
 </script>
 

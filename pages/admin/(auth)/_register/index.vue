@@ -101,9 +101,9 @@ definePageMeta({
 })
 // SEO Meta
 useSeoMeta({
-  title: "Register | Mediatory",
+  title: "Register | Mediawi",
   description: "Register to my website",
-  ogTitle: "Register | Mediatory",
+  ogTitle: "Register | Mediawi",
 });
 </script>
 

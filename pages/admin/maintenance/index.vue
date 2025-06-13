@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <Toolbar class="flex flex-col md:flex-row md:items-center md:justify-between mb-5">
+    <Toolbar class="flex flex-col items-end md:flex-row md:items-center md:justify-between mb-5">
       <template #start>
         <Button
           icon="i-material-symbols:add"
@@ -31,7 +31,7 @@
     <div class="mb-4 flex flex-wrap gap-2">
       <div class="flex items-center gap-2">
         <label for="status-filter" class="font-medium">Status:</label>
-        <Dropdown
+        <Select
           id="status-filter"
           v-model="filters.status"
           :options="statusOptions"
@@ -61,10 +61,11 @@
         'status',
         'technician_name',
       ]"
-      responsive-layout="scroll"
+      tableStyle="min-width: 50rem"
+      filterDisplay="row"
     >
       <template #header>
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col md:flex-row md:justify-between items-center gap-2.5">
           <h2 class="font-bold font-poppins">Daftar Pemeliharaan</h2>
           <IconField>
             <InputIcon>
@@ -80,10 +81,10 @@
       </template>
 
       <template #loading>
-        <ProgressSpinner />
+        <LoadingVideo src="/loading.webm" :width="256" :height="256" />
       </template>
 
-      <Column field="id" header="ID" sortable style="min-width: 6rem"></Column>
+      <Column field="maintenance_id" header="ID" sortable style="min-width: 6rem"></Column>
 
       <Column
         field="equipment.name"
@@ -259,7 +260,7 @@
               :value="formatStatus(selectedMaintenance.status)"
             ></Tag>
           </div>
-          <Dropdown
+          <Select
             v-else
             v-model="editForm.status"
             :options="statusOptions.filter((s) => s.value !== null)"
@@ -631,9 +632,9 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: "Pemeliharaan Peralatan | Mediatory",
+  title: "Pemeliharaan Peralatan | Mediawi",
   description: "Halaman manajemen pemeliharaan peralatan",
-  ogTitle: "Pemeliharaan Peralatan | Mediatory",
+  ogTitle: "Pemeliharaan Peralatan | Mediawi",
 });
 </script>
 

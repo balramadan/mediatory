@@ -117,8 +117,8 @@ export default defineEventHandler(async (event) => {
         }
 
         // Update stok equipment yang ditolak
-        const transactionEquipments =
-          await prisma.transactionEquipment.findMany({
+        const transactionDetails =
+          await prisma.transactionDetail.findMany({
             where: {
               transaction_id: id,
             },
@@ -128,7 +128,7 @@ export default defineEventHandler(async (event) => {
           });
 
         // Kembalikan stok equipment yang telah dikurangi
-        for (const item of transactionEquipments) {
+        for (const item of transactionDetails) {
           await prisma.equipment.update({
             where: {
               equipment_id: item.equipment_id,
@@ -177,8 +177,8 @@ export default defineEventHandler(async (event) => {
         }
 
         // Update stok equipment yang ditolak
-        const transactionEquipments =
-          await prisma.transactionEquipment.findMany({
+        const transactionDetails =
+          await prisma.transactionDetail.findMany({
             where: {
               transaction_id: id,
             },
@@ -188,7 +188,7 @@ export default defineEventHandler(async (event) => {
           });
 
         // Kembalikan stok equipment yang telah dikurangi
-        for (const item of transactionEquipments) {
+        for (const item of transactionDetails) {
           await prisma.equipment.update({
             where: {
               equipment_id: item.equipment_id,

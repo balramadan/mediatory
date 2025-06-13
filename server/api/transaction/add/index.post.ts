@@ -4,7 +4,7 @@ import { sendEmail, emailTemplates } from "~/utils/email";
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event);
-    const { user_id, project, purpose, borrow_date, equipments, return_date } =
+    const { user_id, project, purpose, urgent, borrow_date, equipments, return_date } =
       body;
 
     // Validasi input
@@ -45,6 +45,7 @@ export default defineEventHandler(async (event) => {
         data: {
           project,
           purpose,
+          urgent,
           borrow_date,
           return_date,
           user: {

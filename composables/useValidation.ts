@@ -73,5 +73,8 @@ export const useValidation = () => {
     cleanErrors,
     validateRegistrationForm,
     validateLoginForm,
+    validateEmail, 
+    validatePassword,
+    validatePasswordMatch
   };
 };

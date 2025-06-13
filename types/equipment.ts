@@ -4,6 +4,7 @@ export interface Equipment {
   quantity: number;
   available_quantity: number;
   status: string;
+  imgUrl: string;
   createdAt: string;
   category: {
     category_id: number;

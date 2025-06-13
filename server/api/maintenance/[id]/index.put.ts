@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Fetch maintenance record
-    const maintenance = await prisma.equipmentMaintenance.findUnique({
+    const maintenance = await prisma.maintenance.findUnique({
       where: { id },
       include: {
         equipment: true,
@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
     // Mulai transaction
     const result = await prisma.$transaction(async (tx) => {
       // Update maintenance record
-      const updatedMaintenance = await tx.equipmentMaintenance.update({
+      const updatedMaintenance = await tx.maintenance.update({
         where: { id },
         data: {
           status,

@@ -20,7 +20,9 @@
         </p>
       </template>
 
-      <template #loading><ProgressSpinner /></template>
+      <template #loading>
+        <LoadingVideo src="/loading.webm" :width="256" :height="256" />
+      </template>
 
       <Column header="No" class="text-base font-normal w-16">
         <template #body="slotProps">

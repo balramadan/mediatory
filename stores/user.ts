@@ -10,6 +10,7 @@ export const useUserStore = defineStore("user", {
       email: "",
       phone: "",
       status: "",
+      imgUrl: "",
       createdAt: "",
     },
   }),
@@ -22,6 +23,7 @@ export const useUserStore = defineStore("user", {
         email: userData.email ?? "",
         phone: userData.phone ?? "",
         status: userData.status ?? "",
+        imgUrl: userData.imgUrl ?? "",
         createdAt: userData.createdAt ?? "",
       };
     },
@@ -33,11 +35,23 @@ export const useUserStore = defineStore("user", {
         email: "",
         phone: "",
         status: "",
+        imgUrl: "",
         createdAt: "",
       };
 
       const cookies = useCookie("user");
       cookies.value = null;
+    },
+    updateUser(userData: userData) {
+      this.user = {
+        id: userData.user_id,
+        name: userData.full_name ?? "",
+        email: userData.email ?? "",
+        phone: userData.phone ?? "",
+        status: userData.status ?? "",
+        imgUrl: userData.imgUrl ?? "",
+        createdAt: userData.createdAt ?? "",
+      };
     },
   },
   persist: {

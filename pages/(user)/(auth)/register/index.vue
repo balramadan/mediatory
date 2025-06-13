@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen flex justify-center items-center">
-    <div class="py-5 px-10 w-100 bg-[#eee] gap-5 rounded shadow">
+    <div class="py-5 px-10 w-75 md:w-100 bg-[#eee] gap-5 rounded shadow">
       <NuxtImg width="1600" height="475" src="/logowi.png" />
       <h2 class="text-center text-xl font-bold my-5">Daftar</h2>
       <Form class="flex flex-col gap-5" @submit="register">
@@ -119,9 +119,9 @@ const register = async () => {
 };
 
 useSeoMeta({
-  title: "Register | Mediadesk",
+  title: "Register | Mediawi",
   description: "Register to my website",
-  ogTitle: "Register | Mediadesk",
+  ogTitle: "Register | Mediawi",
 });
 </script>
 

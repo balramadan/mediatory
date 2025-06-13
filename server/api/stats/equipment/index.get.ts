@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
       });
 
       // Equipment aktif (sedang dipinjam)
-      const activeEquipment = await prisma.transactionEquipment.aggregate({
+      const activeEquipment = await prisma.transactionDetail.aggregate({
         where: {
           transaction: {
             status: "approved",
@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
       );
 
       // Equipment dalam pemeliharaan
-      const maintenanceEquipment = await prisma.equipmentMaintenance.aggregate({
+      const maintenanceDetail = await prisma.maintenance.aggregate({
         where: {
           status: "ongoing",
         },
@@ -78,7 +78,7 @@ export default defineEventHandler(async (event) => {
           },
           active: activeEquipment._sum.quantity || 0,
           overdue: overdueEquipmentCount,
-          maintenance: maintenanceEquipment._sum.quantity || 0,
+          maintenance: maintenanceDetail._sum.quantity || 0,
         },
       };
     } else {

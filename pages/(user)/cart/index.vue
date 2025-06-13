@@ -21,40 +21,62 @@
               :class="{
                 'border-t border-surface-200 dark:border-surface-700':
                   index !== 0,
-                'py-5 px-10 flex flex-row items-center justify-between': true,
+                'py-5 px-10 flex flex-col sm:flex-row items-center gap-5': true,
               }"
             >
-              <div class="">
-                <p class="font-bold text-xl">{{ item.name }}</p>
-                <p>Kategori: {{ item.category.category_name }}</p>
+              <div class="min-w-16">
+                <Image v-if="item.imgUrl" preview>
+                  <template #image>
+                    <NuxtImg
+                      :src="item.imgUrl"
+                      :alt="item.name"
+                      class="w-16 h-16 object-cover rounded"
+                    />
+                  </template>
+                  <template #preview="{ style, previewCallback }">
+                    <NuxtImg
+                      :src="item.imgUrl"
+                      :alt="item.name"
+                      :style="style"
+                      @click="previewCallback"
+                    />
+                  </template>
+                </Image>
+                <span v-else class="text-gray-400">No image</span>
               </div>
-              <div class="flex flex-row items-center gap-10">
-                <div class="flex flex-row items-center gap-5">
-                  <Button
-                    :disabled="item.quantity === 1 ? true : false"
-                    icon="i-material-symbols:arrow-left"
-                    aria-label="Kurangi"
-                    severity="secondary"
-                    @click.prevent="decreaseQuantity(item.equipment_id)"
-                  />
-                  <span>{{ item.quantity }}</span>
-                  <Button
-                    :disabled="
-                      item.quantity === item.available_quantity ? true : false
-                    "
-                    icon="i-material-symbols:arrow-right"
-                    aria-label="Tambah"
-                    severity="secondary"
-                    @click.prevent="increaseQuantity(item.equipment_id)"
-                  />
+              <div class="w-full flex flex-col md:flex-row justify-between items-center gap-2.5">
+                <div class="w-full text-center sm:text-start">
+                  <p class="font-bold text-xl">{{ item.name }}</p>
+                  <p>Kategori: {{ item.category.category_name }}</p>
                 </div>
-                <div>
-                  <Button
-                    icon="i-material-symbols:delete"
-                    aria-label="Hapus"
-                    severity="danger"
-                    @click.prevent="removeFromCart(item.equipment_id)"
-                  />
+                <div class="flex flex-row items-center gap-10">
+                  <div class="flex flex-row items-center gap-5">
+                    <Button
+                      :disabled="item.quantity === 1 ? true : false"
+                      icon="i-material-symbols:arrow-left"
+                      aria-label="Kurangi"
+                      severity="secondary"
+                      @click.prevent="decreaseQuantity(item.equipment_id)"
+                    />
+                    <span>{{ item.quantity }}</span>
+                    <Button
+                      :disabled="
+                        item.quantity === item.available_quantity ? true : false
+                      "
+                      icon="i-material-symbols:arrow-right"
+                      aria-label="Tambah"
+                      severity="secondary"
+                      @click.prevent="increaseQuantity(item.equipment_id)"
+                    />
+                  </div>
+                  <div>
+                    <Button
+                      icon="i-material-symbols:delete"
+                      aria-label="Hapus"
+                      severity="danger"
+                      @click.prevent="removeFromCart(item.equipment_id)"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -107,9 +129,9 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: "Keranjang | Mediadesk",
+  title: "Keranjang | Mediawi",
   description: "Daftar Peralatan yang bisa dipinjam",
-  ogTitle: "Keranjang | Mediadesk",
+  ogTitle: "Keranjang | Mediawi",
 });
 </script>
 

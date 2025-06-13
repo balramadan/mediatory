@@ -29,7 +29,7 @@
 
         <div>
           <label class="block mb-2 text-sm">Kondisi:</label>
-          <Dropdown
+          <Select
             v-model="item.condition"
             :options="conditionOptions"
             optionLabel="label"
@@ -234,7 +234,7 @@ onMounted(() => {
 
 <style scoped>
 /* Component specific styles */
-.p-dropdown {
+.p-select {
   width: 100%;
 }
 </style>

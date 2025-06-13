@@ -32,7 +32,8 @@
       ref="dt"
       v-model:selection="selectedCategory"
       :value="category"
-      data-key="id"
+      :loading="loading"
+      data-key="category_id"
       show-gridlines
       striped-rows
     >
@@ -47,16 +48,21 @@
           </IconField>
         </div>
       </template>
+
       <template #empty>
         <p class="text-center">Belum ada kategori</p>
       </template>
-      <template #loading> Tunggu sebentar... </template>
+
+      <template #loading>
+        <LoadingVideo src="/loading.webm" :width="256" :height="256" />
+      </template>
+
       <Column
         selection-mode="multiple"
         style="width: 3rem"
         :exportable="false"
       />
-      <Column field="id" header="ID" class="text-base w-0.5" />
+      <Column field="category_id" header="ID" class="text-base w-0.5" />
       <Column field="name" header="Nama Kategori" class="text-base" />
       <Column header="Jumlah Alat" class="text-base">
         <template #body="slotProps">
@@ -154,7 +160,7 @@
       <div class="flex items-center gap-4">
         <div class="i-material-symbols:warning !text-3xl" />
         <span v-if="category"
-          >Anda yakin ingin menghapus kategori {{ categoryId }}?</span
+          >Anda yakin ingin menghapus kategori {{ categoryName }}?</span
         >
       </div>
       <template #footer>
@@ -182,8 +188,10 @@ import type { Category } from "~/types/category";
 const toast = useToast();
 
 const dt = ref();
+const loading = ref(false);
 const category = ref();
 const categoryId = ref();
+const categoryName = ref("")
 const filteredCategory = ref();
 const searchTerm = ref("");
 const categoryDialog = ref(false);
@@ -204,7 +212,8 @@ const refreshCategory = async () => {
 };
 
 onMounted(async () => {
-  refreshCategory();
+  loading.value = true
+  refreshCategory().then(() => loading.value = false);
 });
 
 // Untuk memunculkan form tambah kategori
@@ -219,7 +228,7 @@ const confirmDeleteSelected = () => {
 
 // Fungsi untuk menghapus kategori yang dipilih
 const deleteSelectedCategory = async () => {
-  const selected = selectedCategory.value.map((cat: Category) => cat.id);
+  const selected = selectedCategory.value.map((cat: Category) => cat.category_id);
 
   await $fetch("/api/category/delete?multiple=true", {
     method: "DELETE",
@@ -257,14 +266,15 @@ const exportCSV = () => {
 };
 
 const editCategory = (cat: Category) => {
-  categoryId.value = cat.id;
+  categoryId.value = cat.category_id;
   editCategoryDialog.value = true;
 };
 
 // Fungsi untuk mengonfirmasi penghapusan kategori
 const confirmDeleteCategory = (cat: Category) => {
   deleteCategoryDialog.value = true;
-  categoryId.value = cat.id;
+  categoryId.value = cat.category_id;
+  categoryName.value = cat.name
 };
 
 // Fungsi untuk menghapus kategori
@@ -307,9 +317,9 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: "List Kategori | Mediatory",
+  title: "List Kategori | Mediawi",
   description: "List kategori alat",
-  ogTitle: "List Kategori | Mediatory",
+  ogTitle: "List Kategori | Mediawi",
 });
 </script>
 

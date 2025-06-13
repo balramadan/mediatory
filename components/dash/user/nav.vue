@@ -2,15 +2,35 @@
   <div
     class="fixed top-0 flex flex-row w-full px-5 py-2 bg-white shadow-sm justify-between items-center z-99"
   >
-    <div id="logo" class="">
+    <div id="logo" class="flex items-center gap-3">
+      <!-- Mobile Menu Button -->
+      <Button
+        icon="i-material-symbols:menu"
+        variant="text"
+        rounded
+        aria-label="Menu"
+        severity="secondary"
+        class="sm:hidden"
+        @click.prevent="openDrawerUser"
+      />
       <NuxtImg src="/logowi.png" height="30" />
     </div>
-    <div class="flex flex-row items-center gap-2">
+
+    <!-- Desktop Profile Section -->
+    <div class="hidden sm:flex sm:flex-row sm:items-center sm:gap-1">
       <Avatar
+        v-if="!imgUrl"
         :label="getInitials(userName)"
         shape="circle"
         size="normal"
-        style="background-color: #C74375; color: #fff"
+        style="background-color: #c74375; color: #fff"
+      />
+      <NuxtImg
+        v-else
+        :src="imgUrl"
+        height="36"
+        width="36"
+        class="h-9 w-9 rounded-full"
       />
       <div class="hidden" sm="flex flex-row items-center gap-1">
         <div sm="flex flex-col gap-0.2">
@@ -24,6 +44,26 @@
           <div class="i-material-symbols:keyboard-arrow-down w-4 h-4" />
         </div>
       </div>
+    </div>
+
+    <div class="sm:hidden">
+      <Avatar
+        v-if="!imgUrl"
+        :label="getInitials(userName)"
+        shape="circle"
+        size="normal"
+        style="background-color: #c74375; color: #fff"
+        @click.prevent="toggle"
+        class="cursor-pointer"
+      />
+      <NuxtImg
+        v-else
+        :src="imgUrl"
+        height="36"
+        width="36"
+        class="h-9 w-9 rounded-full cursor-pointer object-center object-cover"
+        @click.prevent="toggle"
+      />
     </div>
   </div>
   <Menu id="overlay_menu" ref="pop" class="mt-2" :model="items" :popup="true">
@@ -56,25 +96,29 @@
 </template>
 
 <script lang="ts" setup>
-const userId = ref("")
-const userName = ref("")
-const userPhone = ref("")
+const emit = defineEmits(['toggle-drawer']);
+
+const userId = ref("");
+const userName = ref("");
+const userPhone = ref("");
+const imgUrl = ref("");
 
 onMounted(() => {
   // Panggil penyimpanan state user
-  const store = useUserStore()
+  const store = useUserStore();
 
-  userId.value = store.user.id
-  userName.value = store.user.name
-  userPhone.value = store.user.phone
-})
+  userId.value = store.user.id;
+  userName.value = store.user.name;
+  userPhone.value = store.user.phone;
+  imgUrl.value = store.user.imgUrl;
+});
 
 const getInitials = (name: string) => {
-  if (!name) return '?';
+  if (!name) return "?";
   return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
+    .split(" ")
+    .map((word) => word.charAt(0))
+    .join("")
     .toUpperCase()
     .substring(0, 2);
 };
@@ -84,7 +128,7 @@ const items = ref([
   {
     label: "Profile",
     icon: "i-material-symbols:person",
-    route: "/u/",
+    route: "/profile",
   },
   {
     label: "Logout",
@@ -95,6 +139,11 @@ const items = ref([
 const toggle = (event: any) => {
   pop.value.toggle(event);
 };
+
+const openDrawerUser = () => {
+  emit('toggle-drawer')
+  console.log("click burger")
+}
 </script>
 
 <style></style>

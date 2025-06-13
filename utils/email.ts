@@ -9,6 +9,9 @@ const createTransporter = () => {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 };
 
@@ -52,7 +55,9 @@ export const emailTemplates = {
           <p><strong>Item yang dipinjam:</strong></p>
           <ul>
             ${items
-              .map((item: any) => `<li>${item.name} (Qty: ${item.quantity})</li>`)
+              .map(
+                (item: any) => `<li>${item.name} (Qty: ${item.quantity})</li>`
+              )
               .join("")}
           </ul>
         </div>
@@ -74,7 +79,9 @@ export const emailTemplates = {
           <p><strong>Item yang dipinjam:</strong></p>
           <ul>
             ${items
-              .map((item: any) => `<li>${item.name} (Qty: ${item.quantity})</li>`)
+              .map(
+                (item: any) => `<li>${item.name} (Qty: ${item.quantity})</li>`
+              )
               .join("")}
           </ul>
         </div>
@@ -84,7 +91,11 @@ export const emailTemplates = {
     `,
   }),
 
-  borrowRejected: (userName: string, transactionId: number, reason: string) => ({
+  borrowRejected: (
+    userName: string,
+    transactionId: number,
+    reason: string
+  ) => ({
     subject: `Pengajuan Peminjaman Ditolak - #${transactionId}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -101,7 +112,12 @@ export const emailTemplates = {
     `,
   }),
 
-  returnReminder: (userName: string, transactionId: number, dueDate: any, items: any) => ({
+  returnReminder: (
+    userName: string,
+    transactionId: number,
+    dueDate: any,
+    items: any
+  ) => ({
     subject: `Pengingat Pengembalian - #${transactionId}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -114,7 +130,9 @@ export const emailTemplates = {
           <p><strong>Item yang perlu dikembalikan:</strong></p>
           <ul>
             ${items
-              .map((item: any) => `<li>${item.name} (Qty: ${item.quantity})</li>`)
+              .map(
+                (item: any) => `<li>${item.name} (Qty: ${item.quantity})</li>`
+              )
               .join("")}
           </ul>
         </div>

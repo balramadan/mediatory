@@ -78,7 +78,7 @@ export default defineEventHandler(async (event) => {
         data: {
           return_status: returnStatus,
           return_notes: return_notes,
-          return_verified_by: adminData.id,
+          return_admin_id: adminData.id,
           return_verified_at: new Date(),
           status:
             returnStatus === "returned_complete" ? "completed" : "approved",
@@ -88,7 +88,7 @@ export default defineEventHandler(async (event) => {
       const returnRecords = [];
 
       // Cek apakah sudah ada returnRecord sebelumnya untuk transaksi ini
-      const existingReturnRecords = await tx.equipmentReturn.findMany({
+      const existingReturnRecords = await tx.returnDetail.findMany({
         where: {
           transaction_id: transaction_id,
         },
@@ -107,7 +107,7 @@ export default defineEventHandler(async (event) => {
         // Cek apakah equipment ini sudah memiliki record pengembalian
         if (existingRecordsMap[item.equipment_id]) {
           // Update record yang sudah ada
-          returnRecord = await tx.equipmentReturn.update({
+          returnRecord = await tx.returnDetail.update({
             where: {
               id: existingRecordsMap[item.equipment_id].id,
             },
@@ -120,7 +120,7 @@ export default defineEventHandler(async (event) => {
           });
         } else {
           // Buat record baru jika belum ada
-          returnRecord = await tx.equipmentReturn.create({
+          returnRecord = await tx.returnDetail.create({
             data: {
               transaction_id: transaction_id,
               equipment_id: item.equipment_id,

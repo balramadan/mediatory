@@ -46,6 +46,19 @@ export const useNotificationStore = defineStore("notification", {
           console.error(err);
         });
     },
+    async deleteNotif(notificationId: string) {
+      await $fetch(`/api/notification/delete?id=${notificationId}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+        .then(async (res: any) => {
+          await this.getNotification();
+          return res;
+        })
+        .catch((err) => {
+          return err;
+        });
+    },
   },
   persist: {
     storage: piniaPluginPersistedstate.localStorage(),

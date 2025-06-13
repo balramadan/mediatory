@@ -57,7 +57,7 @@ export default defineEventHandler(async (event) => {
     // Mulai transaction database
     const result = await prisma.$transaction(async (tx) => {
       // 1. Buat record maintenance
-      const maintenance = await tx.equipmentMaintenance.create({
+      const maintenance = await tx.maintenance.create({
         data: {
           equipment_id,
           quantity,
@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
           description,
           expected_end_date: expected_end_date ? new Date(expected_end_date) : null,
           technician_name,
-          recorded_by: adminData.admin.id,
+          admin_id: adminData.admin.id,
           status: StatusMaintenance.ongoing,
         },
       });
@@ -78,15 +78,6 @@ export default defineEventHandler(async (event) => {
             decrement: quantity
           },
           status: equipment.available_quantity - quantity <= 0 ? 'maintenance' : 'available',
-        },
-      });
-
-      // 3. Buat notifikasi
-      await tx.notifications.create({
-        data: {
-          title: "Peralatan Dalam Pemeliharaan",
-          message: `${quantity} unit ${equipment.name} telah dimasukkan ke dalam pemeliharaan`,
-          type: "maintenance",
         },
       });
 

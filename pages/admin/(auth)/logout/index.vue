@@ -28,9 +28,9 @@ definePageMeta({
 });
 // SEO Meta
 useSeoMeta({
-  title: "Proses logout... | Mediadesk",
+  title: "Proses logout... | Mediawi",
   description: "Logout untuk admin",
-  ogTitle: "Proses logout... | Mediadesk",
+  ogTitle: "Proses logout... | Mediawi",
 });
 </script>
 

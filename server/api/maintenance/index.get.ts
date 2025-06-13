@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Fetch data maintenance
-    const maintenanceData = await prisma.equipmentMaintenance.findMany({
+    const maintenanceData = await prisma.maintenance.findMany({
       where,
       include: {
         equipment: true,

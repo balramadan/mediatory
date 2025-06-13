@@ -6,15 +6,16 @@
           label="Tambah"
           icon="i-material-symbols:add"
           severity="contrast"
-          @click.prevent="openNew"
+          class="mr-2"
+          @click="openNew"
         />
         <Button
           label="Hapus"
           icon="i-material-symbols:delete"
           severity="danger"
-          class="ml-2"
-          outlined
-          @click.prevent="confirmDeleteSelected"
+          variant="outlined"
+          @click="confirmDeleteSelected"
+          :disabled="!selectedEquipment || !selectedEquipment.length"
         />
       </template>
 
@@ -23,7 +24,7 @@
           label="Export"
           icon="i-material-symbols:upload"
           severity="secondary"
-          @click="exportCSV"
+          @click="exportCSV()"
         />
       </template>
     </Toolbar>
@@ -31,50 +32,75 @@
     <DataTable
       ref="dt"
       v-model:selection="selectedEquipment"
-      v-model:filters="filters"
-      data-key="equipment_id"
       show-gridlines
       striped-rows
-      paginator
+      :filters="filters"
       :value="equipment"
-      :loading="loading"
+      data-key="equipment_id"
+      :paginator="true"
       :rows="6"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} equipment"
       :globalFilterFields="['name', 'status', 'category.category_name']"
+      :loading="loading"
     >
       <template #header>
-        <div class="flex flex-wrap justify-between items-center gap-5">
+        <div class="flex justify-between items-center">
           <h2 class="font-bold font-poppins">Peralatan</h2>
-          <IconField>
+          <IconField iconPosition="left">
             <InputIcon>
               <div class="i-material-symbols:search" />
             </InputIcon>
             <InputText
               v-model="filters['global'].value"
-              placeholder="Search..."
+              placeholder="Keyword Search"
             />
           </IconField>
         </div>
       </template>
 
       <template #empty>
-        <p class="text-center">Belum ada peralatan</p>
+        <div class="text-center">
+          <p>No equipment found.</p>
+        </div>
       </template>
 
-      <template #loading><ProgressSpinner /></template>
+      <template #loading>
+        <LoadingVideo src="/loading.webm" :width="256" :height="256" />
+      </template>
 
-      <Column
-        selection-mode="multiple"
-        style="width: 3rem"
-        :exportable="false"
-      />
-      <Column field="equipment_id" header="ID" class="text-base w-1" />
-      <Column field="name" header="Nama Alat" class="text-base" />
-      <Column
-        field="available_quantity"
-        header="Tersedia"
-        class="text-base w-1"
-      />
-      <Column field="quantity" header="Jumlah Total" class="text-base w-1" />
+      <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+
+      <Column field="imgUrl" class="min-w-7rem">
+        <template #body="slotProps">
+          <Image v-if="slotProps.data.imgUrl" preview>
+            <template #image>
+              <NuxtImg
+                :src="slotProps.data.imgUrl"
+                :alt="slotProps.data.name"
+                class="w-16 h-16 object-cover rounded"
+              />
+            </template>
+            <template #preview="{ style, previewCallback }">
+              <NuxtImg
+                :src="slotProps.data.imgUrl"
+                :alt="slotProps.data.name"
+                :style="style"
+                @click="previewCallback"
+              />
+            </template>
+          </Image>
+          <span v-else class="text-gray-400">No image</span>
+        </template>
+      </Column>
+
+      <Column field="name" header="Nama Alat" sortable class="min-w-15rem" />
+
+      <Column field="available_quantity" header="Tersedia" sortable />
+
+      <Column field="quantity" header="Jumlah Total" sortable />
+
+      <Column field="category.category_name" header="Category" sortable class="min-w-15rem" />
+
       <Column field="status" header="Status Alat" class="text-base">
         <template #body="slotProps">
           <span
@@ -94,107 +120,102 @@
           >
         </template>
       </Column>
-      <Column
-        field="category.category_name"
-        header="Kategori"
-        class="text-base"
-      />
-      <Column :exportable="false" class="w-10">
+
+      <Column :exportable="false" style="min-width: 8rem">
         <template #body="slotProps">
           <Button
             icon="i-material-symbols:edit"
             outlined
             rounded
-            class="mb-2"
-            @click.prevent="editEquipment(slotProps.data)"
+            class="mr-2"
+            @click="editEquipment(slotProps.data)"
           />
           <Button
-            icon="i-material-symbols:delete"
+            icon="i-material-symbols:delete-forever"
             outlined
             rounded
             severity="danger"
-            @click.prevent="confirmDeleteEquipment(slotProps.data)"
+            @click="confirmDeleteEquipment(slotProps.data)"
           />
         </template>
       </Column>
     </DataTable>
 
+    <!-- Add Equipment Dialog -->
     <Dialog
       v-model:visible="equipmentDialog"
       modal
-      header="Tambah Kategori"
-      :style="{ width: '25rem' }"
+      header="Tambah Peralatan"
+      :style="{ width: '30rem' }"
+      @hide="onAddDialogHide"
     >
-      <FormAddEquipment @equipment-added="refreshEquipment()" />
-    </Dialog>
-
-    <Dialog
-      v-model:visible="deleteEquipmentsDialog"
-      :style="{ width: '450px' }"
-      header="Confirm"
-      :modal="true"
-    >
-      <div class="flex items-center gap-4">
-        <div class="i-material-symbols:warning !text-3xl" />
-        <span v-if="equipment">Anda yakin ingin menghapus peralatan?</span>
-      </div>
-      <template #footer>
-        <Button
-          label="No"
-          icon="i-material-symbols:close"
-          severity="danger"
-          text
-          @click.prevent="deleteEquipmentsDialog = false"
-        />
-        <Button
-          label="Yes"
-          icon="i-material-symbols:check"
-          text
-          @click.prevent="deleteSelectedEquipment"
-        />
-      </template>
-    </Dialog>
-
-    <Dialog
-      v-model:visible="editEquipmentDialog"
-      header="Edit Alat"
-      :modal="true"
-      :style="{ width: '25rem' }"
-    >
-      <FormEditEquipment
-        :equipment-id="equipmentId"
-        @edit-complete="
-          {
-            refreshEquipment();
-            editEquipmentDialog = false;
-          }
-        "
+      <FormAddEquipment
+        ref="addEquipmentRef"
+        @equipment-added="onEquipmentAdded"
       />
     </Dialog>
 
+    <!-- Edit Equipment Dialog -->
+    <Dialog
+      v-model:visible="editEquipmentDialog"
+      modal
+      header="Edit Peralatan"
+      :style="{ width: '30rem' }"
+      @hide="onEditDialogHide"
+    >
+      <FormEditEquipment
+        v-if="equipmentId"
+        ref="editEquipmentRef"
+        :equipment-id="equipmentId"
+        @edit-complete="onEditComplete"
+      />
+    </Dialog>
+
+    <!-- Delete Single Equipment Dialog -->
     <Dialog
       v-model:visible="deleteEquipmentDialog"
-      header="Konfirmasi Hapus"
-      :modal="true"
+      modal
+      header="Confirm"
       :style="{ width: '25rem' }"
     >
-      <div class="flex items-center gap-4">
-        <div class="i-material-symbols:warning !text-3xl" />
-        <span v-if="equipment">Anda yakin ingin menghapus alat?</span>
+      <div class="confirmation-content">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+        <span>Are you sure you want to delete this equipment?</span>
       </div>
       <template #footer>
         <Button
           label="No"
-          icon="i-material-symbols:close"
-          severity="danger"
+          icon="pi pi-times"
           text
           @click="deleteEquipmentDialog = false"
         />
+        <Button label="Yes" icon="pi pi-check" text @click="deleteEquipment" />
+      </template>
+    </Dialog>
+
+    <!-- Delete Multiple Equipment Dialog -->
+    <Dialog
+      v-model:visible="deleteEquipmentsDialog"
+      modal
+      header="Confirm"
+      :style="{ width: '25rem' }"
+    >
+      <div class="confirmation-content">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+        <span>Are you sure you want to delete the selected equipment?</span>
+      </div>
+      <template #footer>
+        <Button
+          label="No"
+          icon="pi pi-times"
+          text
+          @click="deleteEquipmentsDialog = false"
+        />
         <Button
           label="Yes"
-          icon="i-material-symbols:check"
+          icon="pi pi-check"
           text
-          @click="deleteEquipment"
+          @click="deleteSelectedEquipment"
         />
       </template>
     </Dialog>
@@ -207,19 +228,24 @@ import { FilterMatchMode } from "@primevue/core/api";
 
 const toast = useToast();
 const storeEquipment = useEquipmentStore();
+
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 
 const loading = ref(false);
 const dt = ref();
-const equipment = ref();
-const equipmentId = ref();
+const equipment = ref<Equipment[]>([]);
+const equipmentId = ref<string>();
 const equipmentDialog = ref(false);
-const selectedEquipment = ref();
+const selectedEquipment = ref<Equipment[]>([]);
 const deleteEquipmentsDialog = ref(false);
 const editEquipmentDialog = ref(false);
 const deleteEquipmentDialog = ref(false);
+
+// Refs for form components
+const addEquipmentRef = ref();
+const editEquipmentRef = ref();
 
 const refreshEquipment = async () => {
   await storeEquipment.getEquipment();
@@ -230,6 +256,19 @@ onMounted(async () => {
   loading.value = true;
   refreshEquipment().finally(() => (loading.value = false));
 });
+
+const getStatusSeverity = (status: string) => {
+  switch (status) {
+    case "available":
+      return "success";
+    case "not_available":
+      return "danger";
+    case "maintenance":
+      return "warning";
+    default:
+      return "info";
+  }
+};
 
 const openNew = () => {
   equipmentDialog.value = true;
@@ -242,12 +281,11 @@ const confirmDeleteSelected = () => {
 const deleteSelectedEquipment = async () => {
   if (!selectedEquipment.value || selectedEquipment.value.length === 0) {
     toast.add({
-      severity: "error",
-      summary: "Peralatan tidak dipilih",
-      detail: "Tidak bisa menghapus karena tidak ada peralatan yang dipilih",
+      severity: "warn",
+      summary: "Warning",
+      detail: "No equipment selected",
       life: 3000,
     });
-
     return;
   }
 
@@ -255,37 +293,40 @@ const deleteSelectedEquipment = async () => {
     (equ: Equipment) => equ.equipment_id
   );
 
-  await $fetch<{ statusCode: number; message: string }>(
-    "/api/equipment/delete?multiple=true",
-    {
+  try {
+    const res = await $fetch<{
+      statusCode: number;
+      message: string;
+      deletedCount?: number;
+    }>("/api/equipment/delete?multiple=true", {
       method: "DELETE",
-      body: {
-        id: selected,
-      },
+      body: { ids: selected }, // Use 'ids' instead of 'id'
       credentials: "include",
-    }
-  )
-    .then((res) => {
-      if (res.statusCode === 200) {
-        refreshEquipment();
-        deleteEquipmentsDialog.value = false;
+    });
 
-        toast.add({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Peralatan berhasil dihapus",
-          life: 3000,
-        });
-      }
-    })
-    .catch((err) => {
+    if (res.statusCode === 200) {
       toast.add({
-        severity: "error",
-        summary: "Gagal",
-        detail: `Gagal menghapus peralatan: ${err}`,
+        severity: "success",
+        summary: "Successful",
+        detail: `${
+          res.deletedCount || selected.length
+        } equipment(s) deleted successfully`,
         life: 3000,
       });
+      await refreshEquipment();
+      selectedEquipment.value = [];
+    }
+  } catch (err: any) {
+    console.error("Delete equipment error:", err);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: err.data?.message || err.message || "Failed to delete equipment",
+      life: 3000,
     });
+  } finally {
+    deleteEquipmentsDialog.value = false;
+  }
 };
 
 const exportCSV = () => {
@@ -303,36 +344,67 @@ const confirmDeleteEquipment = (eq: Equipment) => {
 };
 
 const deleteEquipment = async () => {
-  console.log(equipmentId.value);
+  try {
+    const res = await $fetch<{
+      statusCode: number;
+      message: string;
+      deletedEquipment?: { id: string; name: string };
+    }>("/api/equipment/delete?multiple=false", {
+      method: "DELETE",
+      body: { id: equipmentId.value },
+      credentials: "include",
+    });
 
-  await $fetch("/api/equipment/delete?multiple=false", {
-    method: "DELETE",
-    body: {
-      id: equipmentId.value,
-    },
-    credentials: "include",
-  })
-    .then((res) => {
-      if (res.statusCode === 200) {
-        refreshEquipment();
-        deleteEquipmentDialog.value = false;
-
-        toast.add({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Peralatan berhasil dihapus",
-          life: 3000,
-        });
-      }
-    })
-    .catch((err) => {
+    if (res.statusCode === 200) {
       toast.add({
-        severity: "error",
-        summary: "Gagal",
-        detail: `Gagal menghapus peralatan: ${err}`,
+        severity: "success",
+        summary: "Successful",
+        detail: `Equipment "${
+          res.deletedEquipment?.name || "Unknown"
+        }" deleted successfully`,
         life: 3000,
       });
+      await refreshEquipment();
+    }
+  } catch (err: any) {
+    console.error("Delete equipment error:", err);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: err.data?.message || err.message || "Failed to delete equipment",
+      life: 3000,
     });
+  } finally {
+    deleteEquipmentDialog.value = false;
+  }
+};
+
+// Dialog event handlers
+const onEquipmentAdded = async () => {
+  await refreshEquipment();
+  equipmentDialog.value = false;
+};
+
+const onEditComplete = async () => {
+  await refreshEquipment();
+  editEquipmentDialog.value = false;
+};
+
+const onAddDialogHide = async () => {
+  // Cleanup any temporary files when dialog is closed
+  if (addEquipmentRef.value) {
+    await nextTick();
+    await addEquipmentRef.value.cleanup();
+    addEquipmentRef.value.resetForm();
+  }
+};
+
+const onEditDialogHide = async () => {
+  // Cleanup any temporary files when dialog is closed
+  if (editEquipmentRef.value) {
+    await nextTick();
+    await editEquipmentRef.value.cleanup();
+  }
 };
 
 definePageMeta({
@@ -341,10 +413,15 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: "Daftar Peralatan | Mediatory",
+  title: "Daftar Peralatan | Mediawi",
   description: "Halaman daftar alat admin",
-  ogTitle: "Daftar Peralatan | Mediatory",
+  ogTitle: "Daftar Peralatan | Mediawi",
 });
 </script>
 
-<style></style>
+<style scoped>
+.confirmation-content {
+  display: flex;
+  align-items: center;
+}
+</style>

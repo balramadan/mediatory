@@ -4,6 +4,7 @@ export interface userData {
   email: string | null;
   phone: string | null;
   status: string | null;
+  imgUrl?: string;
   createdAt: string | null;
 }
 
@@ -13,5 +14,6 @@ export interface adminData {
   email: string | null;
   role: string | null;
   last_login: string | null;
+  imgUrl?: string;
   createdAt: string | null;
 }

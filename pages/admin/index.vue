@@ -17,9 +17,9 @@ definePageMeta({
   middleware: ["auth-admin"],
 });
 useSeoMeta({
-  title: "Dashboard Admin | Mediatory",
+  title: "Dashboard Admin | Mediawi",
   description: "Halaman dashboard admin",
-  ogTitle: "Dashboard Admin | Mediatory",
+  ogTitle: "Dashboard Admin | Mediawi",
 });
 </script>
 

@@ -4,6 +4,18 @@ import { hash } from "bcrypt";
 
 export default defineEventHandler(async (event) => {
   try {
+    // Verifikasi admin yang sedang login
+    const adminCookie = getCookie(event, "admin");
+    const admin = adminCookie ? JSON.parse(adminCookie) : null;
+    const isAdmin = admin && admin.isLoggedIn;
+
+    if (!isAdmin) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized",
+      });
+    }
+        
     const body = await readBody(event);
     const { full_name, email, password } = body;
 

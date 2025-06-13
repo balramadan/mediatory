@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Fetch maintenance data
-    const maintenance = await prisma.equipmentMaintenance.findUnique({
+    const maintenance = await prisma.maintenance.findUnique({
       where: { id },
       include: {
         equipment: true,

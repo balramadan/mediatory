@@ -1,12 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  provider    = "prisma-client-js"
+  output      = "../generated/prisma"
+  engine_type = "binary"
 }
 
 datasource db {
@@ -16,151 +11,134 @@ datasource db {
 }
 
 model users {
-  user_id   String     @id @default(uuid())
-  full_name String
-  email     String     @unique
-  password  String
-  phone     String
-  status    StatusUser @default(inactive)
-  imgUrl    String?
-  createdAt DateTime   @default(now())
-
+  user_id      String         @id @default(uuid())
+  full_name    String
+  email        String         @unique
+  password     String
+  phone        String
+  createdAt    DateTime       @default(now())
+  status       StatusUser     @default(inactive)
+  imgUrl       String?
   transactions transactions[]
 }
 
 model admins {
-  admin_id   String    @id @default(uuid())
-  full_name  String
-  email      String    @unique
-  password   String
-  role       RoleAdmin @default(inventory)
-  last_login DateTime?
-  imgUrl     String?
-  createdAt  DateTime  @default(now())
-
-  verified_transactions transactions[]         @relation("borrowVerification")
-  return_verifications  transactions[]         @relation("returnVerification")
-  recorded_maintenance  EquipmentMaintenance[]
+  admin_id              String         @id @default(uuid())
+  full_name             String
+  email                 String         @unique
+  password              String
+  last_login            DateTime?
+  createdAt             DateTime       @default(now())
+  role                  RoleAdmin      @default(inventory)
+  imgUrl                String?
+  recorded_maintenance  maintenance[]
+  return_verifications  transactions[] @relation("returnVerification")
+  verified_transactions transactions[] @relation("borrowVerification")
 }
 
 model equipment {
-  equipment_id       String          @id
+  equipment_id       String              @id
   name               String
   quantity           Int
+  createdAt          DateTime            @default(now())
+  category_id        Int
   available_quantity Int
-  status             StatusEquipment @default(available)
+  status             StatusEquipment     @default(available)
   imgUrl             String?
-  createdAt          DateTime        @default(now())
-
-  category_id Int
-  category    categories @relation(fields: [category_id], references: [category_id])
-
-  transactions      TransactionEquipment[]
-  equipment_returns EquipmentReturn[]
-  maintenance       EquipmentMaintenance[]
+  equipment_returns  ReturnDetail[]
+  transactions       TransactionDetail[]
+  category           categories          @relation(fields: [category_id], references: [category_id])
+  maintenance        maintenance[]
 
   @@index([category_id])
   @@index([status])
 }
 
 model categories {
-  category_id   Int     @id @default(autoincrement())
+  category_id   Int         @id @default(autoincrement())
   category_name String
   description   String?
-
-  equipment equipment[]
+  equipment     equipment[]
 }
 
 model transactions {
-  transaction_id Int               @id @default(autoincrement())
-  project        String
-  purpose        String
-  user_id        String
-  user           users             @relation(fields: [user_id], references: [user_id])
-  status         StatusTransaction @default(pending)
-  borrow_date    DateTime
-  return_date    DateTime
-  createdAt      DateTime          @default(now())
-
-  // Field untuk pengembalian
-  return_status StatusReturn @default(not_returned) // "not returned", "pending_check", "returned_complete", "returned_damaged", "returned_incomplete"
-  return_notes  String? // Catatan admin tentang pengembalian secara keseluruhan
-
-  // Admin yang memverifikasi peminjaman
-  verified_by    String?
-  verified_notes String?
-  verified_at    DateTime?
-  admin          admins?   @relation("borrowVerification", fields: [verified_by], references: [admin_id])
-
-  // Admin yang memverifikasi pengembalian
-  return_verified_by    String?
-  return_verified_notes String?
+  transaction_id        Int                 @id @default(autoincrement())
+  user_id               String
+  borrow_date           DateTime
+  createdAt             DateTime            @default(now())
+  admin_id              String?
+  verified_at           DateTime?
+  return_notes          String?
   return_verified_at    DateTime?
-  return_admin          admins?   @relation("returnVerification", fields: [return_verified_by], references: [admin_id])
-
-  equipments        TransactionEquipment[]
-  equipment_returns EquipmentReturn[]
-  notifications     notifications[]
+  return_admin_id       String?
+  project               String
+  purpose               String
+  status                StatusTransaction   @default(pending)
+  return_status         StatusReturn        @default(not_returned)
+  return_date           DateTime
+  return_verified_notes String?
+  verified_notes        String?
+  urgent                Boolean             @default(false)
+  equipment_returns     ReturnDetail[]
+  equipments            TransactionDetail[]
+  notifications         notifications[]
+  return_admin          admins?             @relation("returnVerification", fields: [return_admin_id], references: [admin_id], map: "transactions_return_verified_by_fkey")
+  user                  users               @relation(fields: [user_id], references: [user_id])
+  admin                 admins?             @relation("borrowVerification", fields: [admin_id], references: [admin_id], map: "transactions_verified_by_fkey")
 
   @@index([user_id])
   @@index([status])
   @@index([return_status])
-  @@index([verified_by])
-  @@index([return_verified_by])
+  @@index([admin_id])
+  @@index([return_admin_id])
 }
 
-// Join table untuk relasi many-to-many antara transactions dan equipment
-model TransactionEquipment {
-  id             Int    @id @default(autoincrement())
+model TransactionDetail {
+  id             Int          @id @default(autoincrement())
   transaction_id Int
   equipment_id   String
   quantity       Int
-
-  transaction transactions @relation(fields: [transaction_id], references: [transaction_id])
-  equipment   equipment    @relation(fields: [equipment_id], references: [equipment_id])
-
-  @@unique([transaction_id, equipment_id])
-}
-
-// Join Table untuk relasi many-to-many antara transactions dan equipment
-// untuk pengembalian
-model EquipmentReturn {
-  id                Int             @id @default(autoincrement())
-  transaction_id    Int
-  equipment_id      String
-  returned_quantity Int
-  condition         ConditionReturn @default(good)
-  damage_notes      String?
-  return_date       DateTime        @default(now())
-
-  transaction transactions @relation(fields: [transaction_id], references: [transaction_id])
-  equipment   equipment    @relation(fields: [equipment_id], references: [equipment_id])
+  equipment      equipment    @relation(fields: [equipment_id], references: [equipment_id])
+  transaction    transactions @relation(fields: [transaction_id], references: [transaction_id])
 
   @@unique([transaction_id, equipment_id])
 }
 
-model EquipmentMaintenance {
-  id                Int               @id @default(autoincrement())
+model ReturnDetail {
+  id                 Int             @id @default(autoincrement())
+  transaction_id     Int
+  equipment_id       String
+  returned_quantity  Int
+  condition          ConditionReturn @default(good)
+  damage_notes       String?
+  penalty_amount     Decimal?        @db.Decimal(10, 2) // Tambahan untuk denda
+  penalty_notes      String? // Tambahan untuk catatan denda
+  replacement_status String?
+  equipment          equipment       @relation(fields: [equipment_id], references: [equipment_id])
+  transaction        transactions    @relation(fields: [transaction_id], references: [transaction_id])
+  createdAt          DateTime        @default(now())
+
+  @@unique([transaction_id, equipment_id])
+}
+
+model maintenance {
+  maintenance_id    Int               @id @default(autoincrement())
   equipment_id      String
-  quantity          Int // Jumlah unit yang di-maintenance
+  quantity          Int
   start_date        DateTime          @default(now())
   expected_end_date DateTime?
   actual_end_date   DateTime?
-  maintenance_type  String // "repair", "cleaning", "calibration", "inspection"
-  description       String? // Deskripsi kerusakan atau alasan maintenance
-  technician_name   String? // Nama teknisi atau pihak yang melakukan maintenance
-  status            StatusMaintenance @default(ongoing) // "ongoing", "completed", "cancelled"
-  notes             String? // Catatan tambahan tentang proses maintenance
+  maintenance_type  String
+  description       String?
+  technician_name   String?
+  status            StatusMaintenance @default(ongoing)
+  notes             String?
+  admin_id          String?
+  equipment         equipment         @relation(fields: [equipment_id], references: [equipment_id], map: "MaintenanceDetail_equipment_id_fkey")
+  admin             admins?           @relation(fields: [admin_id], references: [admin_id], map: "MaintenanceDetail_recorded_by_fkey")
 
-  // Relasi ke model equipment
-  equipment equipment @relation(fields: [equipment_id], references: [equipment_id])
-
-  // Admin yang mencatat maintenance
-  recorded_by String?
-  admin       admins? @relation(fields: [recorded_by], references: [admin_id])
-
-  @@index([equipment_id])
-  @@index([status])
+  @@index([equipment_id], map: "MaintenanceDetail_equipment_id_idx")
+  @@index([status], map: "MaintenanceDetail_status_idx")
 }
 
 model notifications {
@@ -168,11 +146,10 @@ model notifications {
   title           String
   message         String
   is_read         Boolean          @default(false)
-  type            NotificationType @default(transaction)
   createdAt       DateTime         @default(now())
-
-  transaction_id Int?
-  transaction    transactions? @relation(fields: [transaction_id], references: [transaction_id])
+  transaction_id  Int?
+  type            NotificationType @default(transaction)
+  transaction     transactions?    @relation(fields: [transaction_id], references: [transaction_id])
 
   @@index([transaction_id])
   @@index([is_read])

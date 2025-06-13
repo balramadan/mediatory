@@ -17,7 +17,7 @@
           <!-- Status Filter -->
           <div class="flex flex-col">
             <label class="text-sm font-medium mb-2">Status Peminjaman</label>
-            <Dropdown
+            <Select
               v-model="statusFilter"
               :options="statusOptions"
               option-label="label"
@@ -31,7 +31,7 @@
           <!-- Return Status Filter -->
           <div class="flex flex-col">
             <label class="text-sm font-medium mb-2">Status Pengembalian</label>
-            <Dropdown
+            <Select
               v-model="returnStatusFilter"
               :options="returnStatusOptions"
               option-label="label"
@@ -90,10 +90,7 @@
       </template>
 
       <template #loading>
-        <div class="text-center py-8">
-          <ProgressSpinner />
-          <p class="mt-2 text-gray-600">Memuat data...</p>
-        </div>
+        <LoadingVideo src="/loading.webm" :width="256" :height="256" />
       </template>
 
       <!-- Transaction ID Column -->
@@ -307,7 +304,6 @@
 </template>
 
 <script setup lang="ts">
-import { useHistoryStore } from "~/stores/history";
 
 definePageMeta({
   layout: "dashuser",

@@ -43,32 +43,41 @@ export const useHistoryStore = defineStore("history", {
   }),
 
   actions: {
-    async fetchHistory(params: {
-      status?: string;
-      return_status?: string;
-      search?: string;
-      page?: number;
-      limit?: number;
-    } = {}) {
+    async fetchHistory(
+      params: {
+        status?: string;
+        return_status?: string;
+        search?: string;
+        page?: number;
+        limit?: number;
+      } = {}
+    ) {
       this.loading = true;
       this.error = null;
 
       try {
         const queryParams = new URLSearchParams();
-        
+
         if (params.status) queryParams.append("status", params.status);
-        if (params.return_status) queryParams.append("return_status", params.return_status);
+        if (params.return_status)
+          queryParams.append("return_status", params.return_status);
         if (params.search) queryParams.append("search", params.search);
         if (params.page) queryParams.append("page", params.page.toString());
         if (params.limit) queryParams.append("limit", params.limit.toString());
 
-        const response = await $fetch<any>(`/api/user/history?${queryParams.toString()}`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const response = await $fetch<any>(
+          `/api/user/history?${queryParams.toString()}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
         if (response.statusCode === 200) {
-          this.transactions = response.data.transactions;
+          this.transactions = response.data.transactions.sort(
+            (a: Transaction, b: Transaction) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
           this.pagination = response.data.pagination;
         } else {
           this.error = response.message || "Error fetching history";

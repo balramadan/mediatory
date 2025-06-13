@@ -1,8 +1,10 @@
 <template>
   <div class="h-screen flex justify-center items-center">
-    <div class="py-5 px-10 w-100 bg-[#eee] gap-5 rounded shadow">
+    <div class="py-5 px-10 w-75 md:w-100 bg-[#eee] gap-5 rounded shadow">
       <NuxtImg width="1600" height="475" src="/logowi.png" />
-      <h2 class="text-center text-xl font-bold my-5">Masuk Admin</h2>
+      <h2 class="text-center text-base md:text-xl font-bold my-5">
+        Masuk Admin
+      </h2>
       <form class="flex flex-col gap-5" @submit.prevent="login">
         <InputText v-model="email" type="text" placeholder="Email" required />
         <Password
@@ -11,6 +13,7 @@
           :feedback="false"
           input-class="w-100"
           required
+          toggleMask
         />
         <Button
           type="submit"
@@ -18,6 +21,8 @@
           class="px-5 py-3 bg-fuchsia-600 text-white font-bold rounded cursor-pointer transition-all duration-300 ease-in-out"
           hover="bg-fuchsia-700"
           label="Masuk"
+          input-class="w-100"
+          required
         />
       </form>
     </div>
@@ -25,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { adminData } from '~/types/auth';
+import type { adminData } from "~/types/auth";
 
 const toast = useToast();
 
@@ -52,7 +57,7 @@ const login = async () => {
   // Panggil API login
   await $fetch<{
     statusCode: number;
-    message: string,
+    message: string;
     data?: adminData;
   }>("/api/admin/login", {
     method: "POST",
@@ -71,7 +76,7 @@ const login = async () => {
       }
 
       // Redirect ke halaman admin
-      navigateTo("/admin")
+      navigateTo("/admin");
     }
   });
 };
@@ -81,9 +86,9 @@ definePageMeta({
 });
 // SEO Meta
 useSeoMeta({
-  title: "Login Admin | Mediadesk",
+  title: "Login Admin | Mediawi",
   description: "Login untuk admin",
-  ogTitle: "Login Admin | Mediadesk",
+  ogTitle: "Login Admin | Mediawi",
 });
 </script>
 

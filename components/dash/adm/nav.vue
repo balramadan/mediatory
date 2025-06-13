@@ -2,33 +2,56 @@
   <div
     class="fixed top-0 flex flex-row w-full px-5 py-2 bg-white shadow-sm justify-between items-center z-99"
   >
-    <div id="logo" class="">
+    <div id="logo" class="flex items-center gap-3">
+      <!-- Mobile Menu Button -->
+      <Button
+        icon="i-material-symbols:menu"
+        variant="text"
+        rounded
+        aria-label="Menu"
+        severity="secondary"
+        class="sm:hidden"
+        @click.prevent="openDrawer"
+      />
       <NuxtImg src="/logowi.png" height="30" />
     </div>
+
     <div class="flex flex-row items-center sm:gap-2">
-      <OverlayBadge
-        :value="notifBadge"
-        severity="contrast"
-        class="mr-5"
-        size="small"
-      >
-        <Button
-          icon="i-material-symbols:notifications"
-          variant="text"
-          rounded
-          aria-label="Notifikasi"
-          severity="secondary"
-          @click.prevent="toggleNotif"
+      <ClientOnly>
+        <OverlayBadge
+          :value="notifBadge"
+          severity="contrast"
+          class="mr-5"
+          size="small"
+        >
+          <Button
+            icon="i-material-symbols:notifications"
+            variant="text"
+            rounded
+            aria-label="Notifikasi"
+            severity="secondary"
+            @click.prevent="toggleNotif"
+          />
+        </OverlayBadge>
+      </ClientOnly>
+
+      <!-- Desktop Profile Section -->
+      <div class="hidden sm:flex sm:flex-row sm:items-center sm:gap-1">
+        <Avatar
+          v-if="!imgUrl"
+          :label="getInitials(adminName)"
+          shape="circle"
+          size="normal"
+          style="background-color: #c74375; color: #fff"
         />
-      </OverlayBadge>
-      <Avatar
-        :label="getInitials(adminName)"
-        shape="circle"
-        size="normal"
-        style="background-color: #C74375; color: #fff"
-      />
-      <div class="hidden" sm="flex flex-row items-center gap-1">
-        <div sm="flex flex-col gap-0.2">
+        <NuxtImg
+          v-else
+          :src="imgUrl"
+          height="36"
+          width="36"
+          class="h-9 w-9 rounded-full object-cover object-center"
+        />
+        <div class="flex flex-col gap-0.2 ml-2">
           <h2 class="text-xs text-fuchsia-600 font-bold">{{ adminName }}</h2>
           <p class="text-xs">{{ adminRole }}</p>
         </div>
@@ -38,6 +61,27 @@
         >
           <div class="i-material-symbols:keyboard-arrow-down w-4 h-4" />
         </div>
+      </div>
+
+      <!-- Mobile Profile Avatar (simplified) -->
+      <div class="sm:hidden">
+        <Avatar
+          v-if="!imgUrl"
+          :label="getInitials(adminName)"
+          shape="circle"
+          size="normal"
+          style="background-color: #c74375; color: #fff"
+          @click.prevent="toggleMenu"
+          class="cursor-pointer"
+        />
+        <NuxtImg
+          v-else
+          :src="imgUrl"
+          height="36"
+          width="36"
+          class="h-9 w-9 rounded-full cursor-pointer object-center object-cover"
+          @click.prevent="toggleMenu"
+        />
       </div>
     </div>
   </div>
@@ -70,7 +114,7 @@
     </template>
   </Menu>
 
-  <Popover ref="popNotif" class="max-w-25rem max-h-50rem">
+  <Popover ref="popNotif" class="max-w-25rem max-h-20rem">
     <div
       v-for="(item, index) in notif"
       :class="[
@@ -105,13 +149,18 @@
 </template>
 
 <script setup lang="ts">
+const toast = useToast();
+
 const adminStore = useAdminStore();
 const notifStore = useNotificationStore();
+
+const emit = defineEmits(["toggle-drawer"]);
 
 // Variabel informasi admin
 const adminId = ref("");
 const adminName = ref("");
 const adminRole = ref("");
+const imgUrl = ref("");
 
 const notifId = ref();
 
@@ -134,16 +183,17 @@ onMounted(async () => {
   adminId.value = adminStore.admin.id;
   adminName.value = adminStore.admin.name;
   adminRole.value = adminStore.admin.role;
+  imgUrl.value = adminStore.admin.imgUrl;
 
   await notifStore.getNotification();
 });
 
 const getInitials = (name: string) => {
-  if (!name) return '?';
+  if (!name) return "?";
   return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
+    .split(" ")
+    .map((word) => word.charAt(0))
+    .join("")
     .toUpperCase()
     .substring(0, 2);
 };
@@ -174,12 +224,18 @@ const itemsNotif = ref([
   {
     label: "Delete",
     icon: "i-material-symbols:delete",
-    command: () => {},
+    command: async () => {
+      await deleteNotif();
+    },
   },
 ]);
 
 const toggleMenu = (event: any) => {
   pop.value.toggle(event);
+};
+
+const openDrawer = () => {
+  emit("toggle-drawer");
 };
 
 const toggleNotif = (event: any) => {
@@ -194,6 +250,17 @@ const toggleMore = (event: any, id: string) => {
 const markAsRead = async () => {
   await notifStore.markAsRead(notifId.value).then(async () => {
     await notifStore.getNotification();
+  });
+};
+
+const deleteNotif = async () => {
+  await notifStore.deleteNotif(notifId.value).catch((err) => {
+    toast.add({
+      severity: "error",
+      summary: "Gagal",
+      detail: "Gagal menghapus notifikasi",
+      life: 3000,
+    });
   });
 };
 

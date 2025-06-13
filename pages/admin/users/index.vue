@@ -3,21 +3,20 @@
     <Toolbar class="mb-5">
       <template #end>
         <Button
-              icon="i-material-symbols:refresh"
-              label="Refresh"
-              severity="secondary"
-              @click="refreshData"
-            />
+          icon="i-material-symbols:refresh"
+          label="Refresh"
+          severity="secondary"
+          @click="refreshData"
+        />
       </template>
     </Toolbar>
-    
+
     <DataTable
       ref="dt"
       v-model:filters="filters"
       :value="users"
       paginator
       :rows="10"
-      :rowsPerPageOptions="[5, 10, 20, 50]"
       showGridlines
       stripedRows
       :loading="loading"
@@ -38,7 +37,6 @@
                 class="w-64"
               />
             </IconField>
-            
           </div>
         </div>
       </template>
@@ -51,10 +49,7 @@
       </template>
 
       <template #loading>
-        <div class="text-center py-8">
-          <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" />
-          <p class="mt-4 text-gray-500">Memuat data...</p>
-        </div>
+        <LoadingVideo src="/loading.webm" :width="256" :height="256" />
       </template>
 
       <!-- Column ID -->
@@ -70,12 +65,22 @@
       <Column field="full_name" header="User" sortable style="min-width: 200px">
         <template #body="slotProps">
           <div class="flex items-center gap-3">
-            <Avatar
-              :label="getInitials(slotProps.data.full_name)"
-              shape="circle"
-              size="normal"
-              style="background-color: #C74375; color: #fff"
-            />
+            <div>
+              <Avatar
+                v-if="!slotProps.data.imgUrl"
+                :label="getInitials(slotProps.data.full_name)"
+                shape="circle"
+                size="normal"
+                style="background-color: #c74375; color: #fff"
+              />
+              <NuxtImg
+                v-else
+                :src="slotProps.data.imgUrl"
+                width="32"
+                height="32"
+                class="rounded-full w-8 h-8"
+              />
+            </div>
             <div>
               <div class="font-semibold">{{ slotProps.data.full_name }}</div>
               <div class="text-sm text-gray-500">
@@ -167,15 +172,23 @@
     >
       <div v-if="selectedUser" class="space-y-4">
         <div class="text-center mb-6">
-          <Avatar
-            :label="getInitials(selectedUser.full_name)"
-            size="xlarge"
-            shape="circle"
-            style="background-color: #C74375; color: #fff"
-            class="mb-3"
-          />
+          <div class="justify-center items-center">
+            <Avatar
+              v-if="!selectedUser.imgUrl"
+              :label="getInitials(selectedUser.full_name)"
+              shape="circle"
+              size="xlarge"
+              style="background-color: #c74375; color: #fff"
+            />
+            <NuxtImg
+              v-else
+              :src="selectedUser.imgUrl"
+              width="64"
+              height="64"
+              class="rounded-full w-16 h-16 mx-auto"
+            />
+          </div>
           <h3 class="text-xl font-semibold">{{ selectedUser.full_name }}</h3>
-          <p class="text-gray-500">{{ selectedUser.email }}</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -184,16 +197,16 @@
             <p class="font-mono">#{{ selectedUser.user_id }}</p>
           </div>
           <div>
-            <label class="text-sm font-medium text-gray-600">NIM</label>
-            <p>{{ selectedUser.nim || "-" }}</p>
+            <label class="text-sm font-medium text-gray-600">Email</label>
+            <p>{{ selectedUser.email || "-" }}</p>
           </div>
           <div>
             <label class="text-sm font-medium text-gray-600">No. Telepon</label>
-            <p>{{ selectedUser.phone_number || "-" }}</p>
+            <p>{{ selectedUser.phone || "-" }}</p>
           </div>
           <div>
             <label class="text-sm font-medium text-gray-600">Bergabung</label>
-            <p>{{ formatDate(selectedUser.created_at) }}</p>
+            <p>{{ formatDate(selectedUser.createdAt) }}</p>
           </div>
         </div>
 

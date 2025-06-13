@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 export const useMaintenanceStore = defineStore('maintenance', {
   state: () => ({
     maintenances: [] as Array<{
-      id: number,
+      maintenance_id: number,
       equipment_id: string,
       quantity: number,
       start_date: string,
@@ -14,7 +14,7 @@ export const useMaintenanceStore = defineStore('maintenance', {
       technician_name: string | null,
       status: string,
       notes: string | null,
-      recorded_by: string | null,
+      admin_id: string | null,
       equipment: any,
       admin: any
     }>,
@@ -91,7 +91,7 @@ export const useMaintenanceStore = defineStore('maintenance', {
         
         if (response.statusCode === 200 && 'data' in response) {
           // Update local state
-          const index = this.maintenances.findIndex(m => m.id === id);
+          const index = this.maintenances.findIndex(m => m.maintenance_id === id);
           if (index !== -1) {
             this.maintenances[index] = { ...this.maintenances[index], ...response.data };
           }

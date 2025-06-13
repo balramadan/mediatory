@@ -9,10 +9,21 @@
               <InputText id="name" v-model="name" disabled class="w-full" />
               <label for="name">Nama</label>
             </FloatLabel>
+
             <FloatLabel variant="on">
               <InputText id="project" v-model="project" class="w-full" />
               <label for="project">Proyek</label>
             </FloatLabel>
+
+            <div class="flex flex-row items-center gap-1">
+              <Checkbox v-model="urgent" binary />
+              <p>Mendesak?</p>
+              <div
+                class="i-material-symbols:info"
+                v-tooltip.top="'Jika benar-benar mendesak'"
+              />
+            </div>
+
             <FloatLabel variant="on">
               <TextArea
                 id="purpose"
@@ -23,6 +34,7 @@
               />
               <label for="purpose">Tujuan Peminjaman</label>
             </FloatLabel>
+
             <div class="flex flex-row gap-5">
               <FloatLabel class="w-full" variant="on">
                 <DatePicker
@@ -95,6 +107,7 @@ const cart = useCartStore();
 const name = ref("");
 const project = ref("");
 const purpose = ref("");
+const urgent = ref(false);
 const borrowDate = ref();
 const duration = ref();
 const checked = ref(false);
@@ -142,11 +155,6 @@ const isFormValid = computed(() => {
   );
 });
 
-function formatDate(date: any) {
-  if (!date) return "-";
-  return date.toISOString();
-}
-
 function calculateReturnDate() {
   if (!borrowDate.value || !duration.value) return null;
 
@@ -170,6 +178,7 @@ const addBorrow = async () => {
       user_id: userStore.user.id,
       project: project.value,
       purpose: purpose.value,
+      urgent: urgent.value,
       borrow_date: formattedBorrowDate,
       return_date: formattedReturnDate,
       equipments: cart.cart.map((item) => ({

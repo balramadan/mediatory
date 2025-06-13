@@ -65,7 +65,7 @@
       </template>
 
       <template #empty>
-        <div class="text-center py-8">
+        <div class="flex flex-col items-center justify-center text-center py-8">
           <div
             class="i-material-symbols:admin-panel-settings text-6xl text-gray-300 mb-4"
           />
@@ -74,10 +74,7 @@
       </template>
 
       <template #loading>
-        <div class="text-center py-8">
-          <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" />
-          <p class="mt-4 text-gray-500">Memuat data...</p>
-        </div>
+        <LoadingVideo src="/loading.webm" :width="256" :height="256" />
       </template>
 
       <!-- Column Selection -->
@@ -105,12 +102,16 @@
       >
         <template #body="slotProps">
           <div class="flex items-center gap-3">
-            <Avatar
-              :label="getInitials(slotProps.data.full_name)"
-              shape="circle"
-              size="normal"
-              style="background-color: #c74375; color: white"
-            />
+            <div>
+              <Avatar
+                v-if="!slotProps.data.imgUrl"
+                :label="getInitials(slotProps.data.full_name)"
+                shape="circle"
+                size="normal"
+                style="background-color: #C74375; color: #fff"
+              />
+              <NuxtImg v-else :src="slotProps.data.imgUrl" width="32" height="32" class="rounded-full w-8 h-8" />
+            </div>
             <div>
               <div class="font-semibold">{{ slotProps.data.full_name }}</div>
               <div class="text-sm text-gray-500">
@@ -137,7 +138,7 @@
           />
         </template>
         <template #filter="{ filterModel }">
-          <Dropdown
+          <Select
             v-model="filterModel.value"
             :options="roleOptions"
             optionLabel="label"
@@ -299,7 +300,7 @@
       header="Tambah Administrator"
       :style="{ width: '500px' }"
     >
-      <form @submit.prevent="addAdmin" class="space-y-4">
+      <form @submit.prevent="addAdmin" class="space-y-8">
         <div>
           <FloatLabel>
             <InputText
@@ -337,6 +338,7 @@
               id="add-password"
               v-model="addForm.password"
               class="w-full"
+              inputClass="w-full"
               :invalid="!!addErrors.password"
               toggleMask
             />
@@ -349,7 +351,7 @@
 
         <div>
           <FloatLabel>
-            <Dropdown
+            <Select
               id="add-role"
               v-model="addForm.role"
               :options="roleOptions.filter((r) => r.value !== null)"
@@ -388,7 +390,7 @@
       header="Edit Administrator"
       :style="{ width: '500px' }"
     >
-      <form @submit.prevent="updateAdmin" class="space-y-4">
+      <form @submit.prevent="updateAdmin" class="space-y-8">
         <div>
           <FloatLabel>
             <InputText
@@ -422,7 +424,7 @@
 
         <div>
           <FloatLabel>
-            <Dropdown
+            <Select
               id="edit-role"
               v-model="editForm.role"
               :options="roleOptions.filter((r) => r.value !== null)"
@@ -444,7 +446,7 @@
               id="edit-password"
               v-model="editForm.password"
               class="w-full"
-              placeholder="Kosongkan jika tidak ingin mengubah password"
+              inputClass="w-full"
               toggleMask
             />
             <label for="edit-password">Password Baru (Opsional)</label>
@@ -709,11 +711,10 @@ const updateAdmin = async () => {
       return;
     }
 
-    // Panggil API update admin (perlu dibuat)
-    // await $fetch(`/api/admin/${selectedAdmin.value.admin_id}`, {
-    //   method: 'PUT',
-    //   body: editForm.value
-    // });
+    await $fetch(`/api/admin/edit/${selectedAdmin.value.admin_id}`, {
+      method: 'PUT',
+      body: editForm.value
+    });
 
     toast.add({
       severity: "success",
@@ -803,9 +804,9 @@ const confirmDeleteSelected = () => {
 const deleteAdmin = async (admin: any) => {
   try {
     // Panggil API delete admin (perlu dibuat)
-    // await $fetch(`/api/admin/${admin.admin_id}`, {
-    //   method: 'DELETE'
-    // });
+    await $fetch(`/api/admin/delete/${admin.admin_id}`, {
+      method: 'DELETE'
+    });
 
     toast.add({
       severity: "success",
@@ -834,10 +835,10 @@ const deleteSelectedAdmins = async () => {
       .map((admin: any) => admin.admin_id);
 
     // Panggil API delete multiple admins (perlu dibuat)
-    // await $fetch('/api/admin/delete', {
-    //   method: 'DELETE',
-    //   body: { ids: adminIds }
-    // });
+    await $fetch('/api/admin/delete/bulk', {
+      method: 'DELETE',
+      body: { ids: adminIds }
+    });
 
     toast.add({
       severity: "success",
@@ -866,9 +867,9 @@ onMounted(() => {
 
 // SEO
 useSeoMeta({
-  title: "Manajemen Admin | Mediatory",
+  title: "Manajemen Admin | Mediawi",
   description: "Halaman manajemen administrator",
-  ogTitle: "Manajemen Admin | Mediatory",
+  ogTitle: "Manajemen Admin | Mediawi",
 });
 </script>
 

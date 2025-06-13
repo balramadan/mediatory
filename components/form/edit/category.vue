@@ -46,7 +46,7 @@ const categoryDesc = ref("");
 
 onMounted(() => {
   const category = categoryStore.category.find(
-    (cat) => cat.id === props.categoryId
+    (cat) => cat.category_id === props.categoryId
   );
 
   if (category) {
