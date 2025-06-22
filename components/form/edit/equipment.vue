@@ -101,7 +101,7 @@ onMounted(async () => {
   await catStore.getCategory()
   categoryOptions.value = catStore.category.map((cat) => ({
     label: cat.name,
-    value: cat.id,
+    value: cat.category_id,
   }))
 
   // Load existing equipment data

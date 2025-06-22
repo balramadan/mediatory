@@ -16,6 +16,7 @@
           v-model="password"
           placeholder="Password"
           input-class="w-100"
+          toggleMask
           required
         />
         <Password
@@ -23,6 +24,7 @@
           placeholder="Confirm Password"
           :feedback="false"
           input-class="w-100"
+          toggleMask
           required
         />
         <Button

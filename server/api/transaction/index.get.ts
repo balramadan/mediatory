@@ -83,7 +83,15 @@ export default defineEventHandler(async (event) => {
               },
             },
           },
-          equipment_returns: true,
+          equipment_returns: {
+            include: {
+              equipment: {
+                include: {
+                  category: true,
+                },
+              },
+            },
+          },
           return_admin: true,
           notifications: true,
         },

@@ -10,9 +10,11 @@
           placeholder="Password"
           :feedback="false"
           input-class="w-100"
+          toggleMask
           required
         />
         <Button
+          id="submitButton"
           type="submit"
           :unstyled="true"
           class="px-5 py-3 bg-fuchsia-600 text-white font-bold rounded cursor-pointer transition-all duration-300 ease-in-out"

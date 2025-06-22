@@ -151,7 +151,8 @@ const isFormValid = computed(() => {
     borrowDate.value !== undefined &&
     borrowDate.value !== null &&
     duration.value !== undefined &&
-    duration.value !== null
+    duration.value !== null &&
+    checked.value !== false
   );
 });
 

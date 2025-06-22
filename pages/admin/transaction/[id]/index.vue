@@ -518,13 +518,6 @@ const handleEditReturnCompleted = async (data: any) => {
 const handleMaintenanceCompleted = async (data: any) => {
   maintenanceDialog.value = false;
   await refreshTransaction();
-
-  toast.add({
-    severity: "success",
-    summary: "Berhasil",
-    detail: "Jadwal maintenance berhasil dibuat",
-    life: 3000,
-  });
 };
 
 const handlePenaltyCompleted = async (data: any) => {

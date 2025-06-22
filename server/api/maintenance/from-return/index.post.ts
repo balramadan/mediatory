@@ -3,7 +3,7 @@ import prisma from "~/lib/prisma";
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event);
-    const { transaction_id, penalty_items } = body;
+    const { maintenance_requests, borrower_info } = body;
 
     const adminCookie = getCookie(event, "admin");
     const adminData = adminCookie ? JSON.parse(adminCookie) : null;
@@ -16,56 +16,43 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      // Update penalty information for each item
-      for (const item of penalty_items) {
-        await tx.returnDetail.updateMany({
-          where: {
-            transaction_id: transaction_id,
-            equipment_id: item.equipment_id,
-          },
+    const results = await Promise.all(
+      maintenance_requests.map(async (request: any) => {
+        return await prisma.maintenance.create({
           data: {
-            replacement_status: item.replacement_status,
-            penalty_amount: item.penalty_amount,
-            penalty_notes: item.penalty_notes,
+            equipment_id: request.equipment_id,
+            quantity: request.quantity,
+            maintenance_type: request.maintenance_type,
+            description: request.description,
+            technician_name: request.technician_name,
+            expected_end_date: request.expected_end_date ? new Date(request.expected_end_date) : null,
+            notes: request.notes,
+            admin_id: adminData.admin.admin_id,
+          },
+          include: {
+            equipment: true,
+            admin: true,
           },
         });
-      }
+      })
+    );
 
-      // Create notification for penalty
-      const totalPenalty = penalty_items.reduce((sum: number, item: any) => sum + (item.penalty_amount || 0), 0);
-      
-      if (totalPenalty > 0) {
-        await tx.notifications.create({
-          data: {
-            title: "Denda Penggantian Ditetapkan",
-            message: `Denda sebesar Rp ${totalPenalty.toLocaleString('id-ID')} ditetapkan untuk transaksi #${transaction_id}`,
-            type: "transaction",
-            transaction_id: transaction_id,
-          },
-        });
-      }
-
-      return await tx.transactions.findUnique({
-        where: { transaction_id },
-        include: {
-          equipment_returns: {
-            include: { equipment: true }
-          },
-          user: true,
-          admin: true,
-          return_admin: true,
-        }
-      });
+    // Create notification
+    await prisma.notifications.create({
+      data: {
+        title: "Maintenance Baru dari Return",
+        message: `Maintenance dijadwalkan untuk ${results.length} item karena kerusakan dari peminjaman oleh ${borrower_info.full_name}`,
+        type: "maintenance",
+      },
     });
 
     return {
       statusCode: 200,
-      message: "Penalty settings updated successfully",
-      data: result,
+      message: "Maintenance schedules created successfully",
+      data: results,
     };
   } catch (error) {
-    console.error("Error updating penalty:", error);
+    console.error("Error creating maintenance from return:", error);
     throw createError({
       statusCode: 500,
       statusMessage: "Internal Server Error",

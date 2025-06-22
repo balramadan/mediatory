@@ -115,7 +115,6 @@ export default defineEventHandler(async (event) => {
               returned_quantity: item.returned_quantity,
               condition: item.condition,
               damage_notes: item.damage_notes || null,
-              return_date: new Date(),
             },
           });
         } else {
@@ -127,7 +126,6 @@ export default defineEventHandler(async (event) => {
               returned_quantity: item.returned_quantity,
               condition: item.condition,
               damage_notes: item.damage_notes || null,
-              return_date: new Date(),
             },
           });
         }

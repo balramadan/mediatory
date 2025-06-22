@@ -2,11 +2,17 @@ import { defineVitestConfig } from "@nuxt/test-utils/config";
 
 export default defineVitestConfig({
   test: {
-    environment: "nuxt",
-    setupFiles: ["./tests/setup.ts"],
-    coverage: {
-        provider: "v8"
-    },
+    environment: "happy-dom", // cocok untuk test komponen Vue
     globals: true,
+    include: ["tests/**/*.test.ts", "components/**/*.test.ts"],
+    server: {
+      deps: {
+        inline: ["@vue", "primevue"],
+      }
+    },
+    env: {
+      NODE_ENV: "test",
+    },
+    setupFiles: ['./tests/setup.ts'],
   },
 });
