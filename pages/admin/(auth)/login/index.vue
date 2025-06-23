@@ -49,8 +49,21 @@ const login = async () => {
   const isValid = validateLoginForm(email.value, password.value);
 
   if (!isValid) {
-    if (errors.email) alert(errors.email);
-    else if (errors.password) alert(errors.password);
+    if (errors.email) {
+      toast.add({
+        severity: "error",
+        summary: "Gagal",
+        detail: errors.email,
+        life: 3000,
+      });
+    } else if (errors.password) {
+      toast.add({
+        severity: "error",
+        summary: "Gagal",
+        detail: errors.password,
+        life: 3000,
+      });
+    }
     return;
   }
 
@@ -62,23 +75,32 @@ const login = async () => {
   }>("/api/admin/login", {
     method: "POST",
     body: { email: email.value, password: password.value },
-  }).then((res) => {
-    if (res.statusCode === 200) {
+  })
+    .then((res) => {
+      if (res.statusCode === 200) {
+        toast.add({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Berhasi login admin",
+          life: 3000,
+        });
+
+        if (res.data) {
+          store.login(res.data);
+        }
+
+        // Redirect ke halaman admin
+        navigateTo("/admin");
+      }
+    })
+    .catch((err) => {
       toast.add({
-        severity: "success",
-        summary: "Berhasil",
-        detail: "Berhasi login admin",
+        severity: "error",
+        summary: "Gagal",
+        detail: err.data?.message,
         life: 3000,
       });
-
-      if (res.data) {
-        store.login(res.data);
-      }
-
-      // Redirect ke halaman admin
-      navigateTo("/admin");
-    }
-  });
+    });
 };
 
 definePageMeta({

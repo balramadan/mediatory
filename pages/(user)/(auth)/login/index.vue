@@ -25,11 +25,10 @@
       <div class="mt-5">
         <p class="text-center text-sm">
           Belum punya akun?
-          <NuxtLink
-            to="/register"
-            class="text-fuchsia-600 font-semibold"
+          <NuxtLink to="/register" class="text-fuchsia-600 font-semibold"
             >Daftar</NuxtLink
-          ></p>
+          >
+        </p>
       </div>
     </div>
   </div>
@@ -58,8 +57,21 @@ const login = async () => {
   const isValid = validateLoginForm(email.value, password.value);
 
   if (!isValid) {
-    if (errors.email) alert(errors.email);
-    else if (errors.password) alert(errors.password);
+    if (errors.email) {
+      toast.add({
+        severity: "error",
+        summary: "Gagal",
+        detail: errors.email,
+        life: 3000,
+      });
+    } else if (errors.password) {
+      toast.add({
+        severity: "error",
+        summary: "Gagal",
+        detail: errors.password,
+        life: 3000,
+      });
+    }
     return;
   }
 
@@ -97,7 +109,7 @@ const login = async () => {
       toast.add({
         severity: "error",
         summary: "Gagal",
-        detail: `${error}`,
+        detail: error?.data?.message || "Terjadi kesalahan, silakan coba lagi",
         life: 3000,
       });
     });

@@ -55,9 +55,28 @@ const register = async () => {
   );
 
   if (!isValid) {
-    if (errors.email) alert(errors.email);
-    else if (errors.password) alert(errors.password);
-    else if (errors.confirmPassword) alert(errors.confirmPassword);
+    if (errors.email) {
+      toast.add({
+        severity: "error",
+        summary: "Gagal",
+        detail: errors.email,
+        life: 3000,
+      });
+    } else if (errors.password) {
+      toast.add({
+        severity: "error",
+        summary: "Gagal",
+        detail: errors.password,
+        life: 3000,
+      });
+    } else if (errors.confirmPassword) {
+      toast.add({
+        severity: "error",
+        summary: "Gagal",
+        detail: errors.confirmPassword,
+        life: 3000,
+      });
+    }
     return;
   }
    
