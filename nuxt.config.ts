@@ -38,6 +38,11 @@ export default defineNuxtConfig({
       ripple: true,
     },
   },
+  nitro: {
+    externals: {
+      external: ["process"],
+    },
+  },
   vite: {
     optimizeDeps: {
       exclude: ["js-cookie"],
