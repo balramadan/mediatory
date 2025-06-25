@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
       data: sanitizedUsers,
     };
   } catch (error) {
+    console.error("Error fetching users:", error);
     throw createError({
       statusCode: 500,
       message: "Internal server error",
