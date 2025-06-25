@@ -67,6 +67,8 @@
                     </p>
                   </div>
                 </div>
+
+                <p>Jumlah: {{ equipment.quantity }}</p>
               </div>
             </div>
           </div>
