@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   if (!isAdmin) {
     throw createError({
       statusCode: 401,
-      statusMessage: "Unauthorized"
+      message: "Unauthorized"
     })
   }
 
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
       if (!formData) {
         throw createError({
           statusCode: 400,
-          statusMessage: 'No form data received'
+          message: 'No form data received'
         })
       }
 
@@ -41,14 +41,14 @@ export default defineEventHandler(async (event) => {
       if (!equipmentData.name || !equipmentData.quantity || !equipmentData.category_id) {
         throw createError({
           statusCode: 400,
-          statusMessage: "Name, quantity, and category ID are required"
+          message: "Name, quantity, and category ID are required"
         })
       }
 
       if (parseInt(equipmentData.quantity) <= 0) {
         throw createError({
           statusCode: 400,
-          statusMessage: "Quantity must be greater than 0"
+          message: "Quantity must be greater than 0"
         })
       }
 
@@ -81,14 +81,14 @@ export default defineEventHandler(async (event) => {
       if (!name || !quantity || !category_id) {
         throw createError({
           statusCode: 400,
-          statusMessage: "Name, quantity, and category ID are required"
+          message: "Name, quantity, and category ID are required"
         })
       }
 
       if (quantity <= 0) {
         throw createError({
           statusCode: 400,
-          statusMessage: "Quantity must be greater than 0"
+          message: "Quantity must be greater than 0"
         })
       }
 
@@ -117,7 +117,7 @@ export default defineEventHandler(async (event) => {
     console.error('Equipment creation error:', error)
     throw createError({
       statusCode: error.statusCode || 500,
-      statusMessage: error.statusMessage || "Internal Server Error",
+      message: error.message || "Internal Server Error",
     })
   }
 })

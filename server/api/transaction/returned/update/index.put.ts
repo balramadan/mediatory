@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     if (!isAdmin) {
       throw createError({
         statusCode: 401,
-        statusMessage: "Unauthorized",
+        message: "Unauthorized",
       });
     }
 
@@ -73,7 +73,7 @@ export default defineEventHandler(async (event) => {
     console.error("Error updating return details:", error);
     throw createError({
       statusCode: 500,
-      statusMessage: "Internal Server Error",
+      message: "Internal Server Error",
     });
   }
 });

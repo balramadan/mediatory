@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     if (!adminId) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Admin ID is required",
+        message: "Admin ID is required",
       });
     }
 
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     if (!isAdmin) {
       throw createError({
         statusCode: 401,
-        statusMessage: "Unauthorized",
+        message: "Unauthorized",
       });
     }
 
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
     if (adminData.admin.role !== "superadmin") {
       throw createError({
         statusCode: 403,
-        statusMessage: "Forbidden: Only superadmin can delete admins",
+        message: "Forbidden: Only superadmin can delete admins",
       });
     }
 
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
     if (!adminToDelete) {
       throw createError({
         statusCode: 404,
-        statusMessage: "Admin not found",
+        message: "Admin not found",
       });
     }
 
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
     if (adminToDelete.role === "superadmin") {
       throw createError({
         statusCode: 403,
-        statusMessage: "Cannot delete superadmin",
+        message: "Cannot delete superadmin",
       });
     }
 
@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
     if (adminToDelete.admin_id === adminData.admin.id) {
       throw createError({
         statusCode: 403,
-        statusMessage: "Cannot delete your own account",
+        message: "Cannot delete your own account",
       });
     }
 
@@ -83,7 +83,7 @@ export default defineEventHandler(async (event) => {
     ) {
       throw createError({
         statusCode: 409,
-        statusMessage:
+        message:
           "Cannot delete admin with existing transaction or maintenance records. Consider deactivating instead.",
       });
     }
@@ -110,7 +110,7 @@ export default defineEventHandler(async (event) => {
     console.error("Error deleting admin:", error);
     throw createError({
       statusCode: 500,
-      statusMessage: "Internal server error",
+      message: "Internal server error",
     });
   }
 });

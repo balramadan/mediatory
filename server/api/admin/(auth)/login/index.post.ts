@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
     if (!email || !password) {
       return createError({
         statusCode: 400,
-        statusMessage: "Missing required fields",
+        message: "Missing required fields",
       });
     }
 
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     if (!loginAdmin) {
       return createError({
         statusCode: 401,
-        statusMessage: "Invalid email",
+        message: "Invalid email",
       });
     }
 
@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
     if (!isPasswordValid) {
       return createError({
         statusCode: 401,
-        statusMessage: "Invalid password",
+        message: "Invalid password",
       });
     }
 

@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     if (!userId) {
       throw createError({
         statusCode: 400,
-        statusMessage: "User ID is required",
+        message: "User ID is required",
       });
     }
 
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     if (!isUser) {
       throw createError({
         statusCode: 401,
-        statusMessage: "Unauthorized",
+        message: "Unauthorized",
       });
     }
 
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     if (userData.user.id !== userId) {
       throw createError({
         statusCode: 403,
-        statusMessage: "Forbidden: You can only update your own profile",
+        message: "Forbidden: You can only update your own profile",
       });
     }
 
@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
     if (!full_name || !email) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Full name and email are required",
+        message: "Full name and email are required",
       });
     }
 
@@ -84,7 +84,7 @@ export default defineEventHandler(async (event) => {
     if (!currentUser) {
       throw createError({
         statusCode: 404,
-        statusMessage: "User not found",
+        message: "User not found",
       });
     }
 
@@ -123,7 +123,7 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     throw createError({
       statusCode: error.statusCode || 500,
-      statusMessage: error.statusMessage || "Internal server error",
+      message: error.message || "Internal server error",
     });
   }
 });

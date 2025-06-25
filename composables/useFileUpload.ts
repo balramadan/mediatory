@@ -31,7 +31,7 @@ export const useFileUpload = () => {
           } else {
             try {
               const errorResponse = JSON.parse(xhr.responseText)
-              reject(new Error(errorResponse.statusMessage || 'Upload failed'))
+              reject(new Error(errorResponse.message || 'Upload failed'))
             } catch {
               reject(new Error(`Upload failed with status: ${xhr.status}`))
             }

@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     if (!key) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'File key is required'
+        message: 'File key is required'
       })
     }
 
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     throw createError({
       statusCode: error.statusCode || 500,
-      statusMessage: error.statusMessage || 'Failed to delete file'
+      message: error.message || 'Failed to delete file'
     })
   }
 })
