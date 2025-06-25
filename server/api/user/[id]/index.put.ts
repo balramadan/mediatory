@@ -1,5 +1,4 @@
 import prisma from "~/lib/prisma";
-import { Prisma } from "~/generated/prisma";
 import { UploadService } from "~/utils/uploadService";
 
 export default defineEventHandler(async (event) => {
@@ -122,15 +121,6 @@ export default defineEventHandler(async (event) => {
       data: updatedUser,
     };
   } catch (error: any) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        throw createError({
-          statusCode: 409,
-          statusMessage: "Email already exists",
-        });
-      }
-    }
-
     throw createError({
       statusCode: error.statusCode || 500,
       statusMessage: error.statusMessage || "Internal server error",
