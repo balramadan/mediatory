@@ -530,7 +530,7 @@ const updateMaintenanceRecord = async () => {
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: error.message || "An error occurred",
+      detail: error.data?.message || "An error occurred",
       life: 3000,
     });
   }
@@ -575,7 +575,7 @@ const finishMaintenance = async () => {
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: error.message || "Terjadi kesalahan",
+      detail: error.data?.message || "Terjadi kesalahan",
       life: 3000,
     });
   }

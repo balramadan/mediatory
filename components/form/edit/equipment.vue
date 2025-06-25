@@ -199,7 +199,7 @@ const editEquipment = async () => {
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: error.message || "Terjadi kesalahan saat mengedit peralatan",
+      detail: error.data?.message || "Terjadi kesalahan saat mengedit peralatan",
       life: 3000,
     })
   } finally {

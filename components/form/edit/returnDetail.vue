@@ -175,7 +175,7 @@ const saveChanges = async () => {
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: error.message || "Terjadi kesalahan saat menyimpan perubahan",
+      detail: error.data?.message || "Terjadi kesalahan saat menyimpan perubahan",
       life: 3000,
     });
   } finally {
