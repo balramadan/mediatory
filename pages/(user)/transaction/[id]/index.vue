@@ -231,14 +231,14 @@
     </div>
     <template #footer>
       <Button
-        label="No"
+        label="Tidak"
         icon="i-material-symbols:close"
         severity="danger"
         text
         @click="returnConfirmDialog = false"
       />
       <Button
-        label="Yes"
+        label="Ya"
         icon="i-material-symbols:check"
         text
         @click="returned"

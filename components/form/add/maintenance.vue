@@ -1,5 +1,5 @@
 <template>
-  <Form @submit.prevent="saveMaintenance" class="flex flex-col ">
+  <Form @submit.prevent="saveMaintenance" class="flex flex-col">
     <FloatLabel variant="on" class="mt-5 mb-5">
       <Select
         id="equipment"
@@ -169,7 +169,14 @@ const saveMaintenance = async () => {
       detail: "Harap isi semua kolom yang diperlukan",
       life: 3000,
     });
-    emit("cancel");
+    return;
+  } else if (!maintenanceForm.expected_end_date) {
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Harap isi Perkiraan tanggal selesai",
+      life: 3000,
+    });
     return;
   }
 
@@ -191,14 +198,16 @@ const saveMaintenance = async () => {
         detail: result.message || "Gagal menambahkan pemeliharaan",
         life: 3000,
       });
+      emit("cancel");
     }
   } catch (error: any) {
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: error.message || "Terjadi kesalahan",
+      detail: error.data?.message,
       life: 3000,
     });
+    emit("cancel");
   }
 };
 </script>

@@ -18,7 +18,11 @@
     <div class="field mb-4">
       <label class="font-bold">Jenis Pemeliharaan</label>
       <div class="mt-1">
-        <Tag :severity="getMaintenanceTypeSeverity(selectedMaintenance.maintenance_type)">
+        <Tag
+          :severity="
+            getMaintenanceTypeSeverity(selectedMaintenance.maintenance_type)
+          "
+        >
           {{ formatMaintenanceType(selectedMaintenance.maintenance_type) }}
         </Tag>
       </div>
@@ -86,9 +90,18 @@
     <div class="field mb-4">
       <label class="font-bold">Deskripsi</label>
       <div v-if="viewMode" class="mt-1 whitespace-pre-line">
-        {{ selectedMaintenance.description || "Tidak ada deskripsi" }}
+        {{ selectedMaintenance || "Tidak ada deskripsi" }}
       </div>
+      <Textarea
+        v-else
+        v-model="selectedMaintenance.description"
+        rows="3"
+        class="mt-1"
+        placeholder="Tambahkan deskripsi"
+      />
     </div>
+
+    {{ selectedMaintenance }}
 
     <div class="flex flex-col mb-5">
       <label class="font-bold">Catatan</label>
@@ -197,7 +210,7 @@ const formatStatus = (status: string) => {
     [StatusMaintenance.cancelled]: "Dibatalkan",
   };
   return status in statusMap
-    ? statusMap[(status as unknown) as StatusMaintenance]
+    ? statusMap[status as unknown as StatusMaintenance]
     : status;
 };
 </script>

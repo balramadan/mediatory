@@ -62,7 +62,7 @@
             <Button
               v-if="isFormValid"
               severity="contrast"
-              label="Next"
+              label="Selanjutnya"
               @click="activateCallback('2')"
             />
           </div>

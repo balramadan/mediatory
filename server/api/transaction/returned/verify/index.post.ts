@@ -65,6 +65,15 @@ export default defineEventHandler(async (event) => {
       } else if (item.condition === "lost") {
         returnStatus = "returned_incomplete";
         break;
+      } else if (
+        item.condition === "good" &&
+        item.returned_quantity < item.quantity
+      ) {
+        returnStatus = "pending_check"
+        return createError({
+          statusCode: 400,
+          message: "Jumlah barang yang dikembalikan kurang dari seharusnya, verifikasi tidak dapat dilanjutkan.",
+        });
       }
     }
 
@@ -98,7 +107,7 @@ export default defineEventHandler(async (event) => {
       const existingRecordsMap = existingReturnRecords.reduce<any>((map, record) => {
         map[record.equipment_id] = record;
         return map;
-      }, {});
+      }, {})
 
       // Proses semua equipment returns
       for (const item of equipment_returns) {

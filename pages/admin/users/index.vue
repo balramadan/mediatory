@@ -276,13 +276,6 @@
 
         <div>
           <FloatLabel>
-            <InputText id="edit-nim" v-model="editForm.nim" class="w-full" />
-            <label for="edit-nim">NIM</label>
-          </FloatLabel>
-        </div>
-
-        <div>
-          <FloatLabel>
             <InputText
               id="edit-phone"
               v-model="editForm.phone_number"
@@ -335,7 +328,6 @@ const selectedUser = ref<any>();
 const editForm = ref({
   full_name: "",
   email: "",
-  nim: "",
   phone_number: "",
 });
 
@@ -346,7 +338,6 @@ const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   full_name: { value: null, matchMode: FilterMatchMode.CONTAINS },
   email: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  nim: { value: null, matchMode: FilterMatchMode.CONTAINS },
   phone_number: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 
@@ -424,8 +415,7 @@ const editUser = (user: any) => {
   editForm.value = {
     full_name: user.full_name || "",
     email: user.email || "",
-    nim: user.nim || "",
-    phone_number: user.phone_number || "",
+    phone_number: user.phone || "",
   };
   editErrors.value = {};
   showEditDialog.value = true;
@@ -448,20 +438,29 @@ const updateUser = async () => {
     }
 
     // Panggil API update (perlu dibuat)
-    // await $fetch(`/api/user/${selectedUser.value.user_id}`, {
-    //   method: 'PUT',
-    //   body: editForm.value
-    // });
+    await $fetch(`/api/user/adm/${selectedUser.value.user_id}`, {
+      method: "PUT",
+      body: editForm.value,
+    })
+      .then(async () => {
+        toast.add({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data user berhasil diperbarui",
+          life: 3000,
+        });
 
-    toast.add({
-      severity: "success",
-      summary: "Berhasil",
-      detail: "Data user berhasil diperbarui",
-      life: 3000,
-    });
-
-    showEditDialog.value = false;
-    await fetchUsers();
+        showEditDialog.value = false;
+        await fetchUsers();
+      })
+      .catch((error) => {
+        toast.add({
+          severity: "error",
+          summary: "Gagal",
+          detail: error.data?.message,
+          life: 3000,
+        });
+      });
   } catch (error) {
     console.error("Error updating user:", error);
     toast.add({
@@ -498,18 +497,27 @@ const confirmDelete = (user: any) => {
 const deleteUser = async (user: any) => {
   try {
     // Panggil API delete (perlu dibuat)
-    // await $fetch(`/api/user/${user.user_id}`, {
-    //   method: 'DELETE'
-    // });
+    await $fetch(`/api/user/adm/${user.user_id}`, {
+      method: "DELETE",
+    })
+      .then(async () => {
+        toast.add({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "User berhasil dihapus",
+          life: 3000,
+        });
 
-    toast.add({
-      severity: "success",
-      summary: "Berhasil",
-      detail: "User berhasil dihapus",
-      life: 3000,
-    });
-
-    await fetchUsers();
+        await fetchUsers();
+      })
+      .catch((error) => {
+        toast.add({
+          severity: "error",
+          summary: "Gagal",
+          detail: error.data?.message,
+          life: 3000,
+        });
+      });
   } catch (error) {
     console.error("Error deleting user:", error);
     toast.add({

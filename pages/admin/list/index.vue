@@ -108,9 +108,15 @@
                 :label="getInitials(slotProps.data.full_name)"
                 shape="circle"
                 size="normal"
-                style="background-color: #C74375; color: #fff"
+                style="background-color: #c74375; color: #fff"
               />
-              <NuxtImg v-else :src="slotProps.data.imgUrl" width="32" height="32" class="rounded-full w-8 h-8" />
+              <NuxtImg
+                v-else
+                :src="slotProps.data.imgUrl"
+                width="32"
+                height="32"
+                class="rounded-full w-8 h-8"
+              />
             </div>
             <div>
               <div class="font-semibold">{{ slotProps.data.full_name }}</div>
@@ -300,9 +306,9 @@
       header="Tambah Administrator"
       :style="{ width: '500px' }"
     >
-      <form @submit.prevent="addAdmin" class="space-y-8">
+      <form @submit.prevent="addAdmin" class="space-y-5">
         <div>
-          <FloatLabel>
+          <FloatLabel variant="on" class="mt-2.5">
             <InputText
               id="add-name"
               v-model="addForm.full_name"
@@ -317,7 +323,7 @@
         </div>
 
         <div>
-          <FloatLabel>
+          <FloatLabel variant="on">
             <InputText
               id="add-email"
               v-model="addForm.email"
@@ -333,7 +339,7 @@
         </div>
 
         <div>
-          <FloatLabel>
+          <FloatLabel variant="on">
             <Password
               id="add-password"
               v-model="addForm.password"
@@ -350,15 +356,16 @@
         </div>
 
         <div>
-          <FloatLabel>
+          <FloatLabel variant="on">
             <Select
               id="add-role"
               v-model="addForm.role"
-              :options="roleOptions.filter((r) => r.value !== null)"
+              :options="[{ label: 'Inventory', value: 'inventory' }]"
               optionLabel="label"
               optionValue="value"
               class="w-full"
               :invalid="!!addErrors.role"
+              disabled
             />
             <label for="add-role">Role</label>
           </FloatLabel>
@@ -432,6 +439,7 @@
               optionValue="value"
               class="w-full"
               :invalid="!!editErrors.role"
+              disabled
             />
             <label for="edit-role">Role</label>
           </FloatLabel>
@@ -666,23 +674,32 @@ const addAdmin = async () => {
     await $fetch("/api/admin/register", {
       method: "POST",
       body: addForm.value,
-    });
+    })
+      .then(async () => {
+        toast.add({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Admin berhasil ditambahkan",
+          life: 3000,
+        });
 
-    toast.add({
-      severity: "success",
-      summary: "Berhasil",
-      detail: "Admin berhasil ditambahkan",
-      life: 3000,
-    });
-
-    showAddDialog.value = false;
-    addForm.value = {
-      full_name: "",
-      email: "",
-      password: "",
-      role: "inventory",
-    };
-    await fetchAdmins();
+        showAddDialog.value = false;
+        addForm.value = {
+          full_name: "",
+          email: "",
+          password: "",
+          role: "inventory",
+        };
+        await fetchAdmins();
+      })
+      .catch((error) => {
+        toast.add({
+          severity: "error",
+          summary: "Gagal",
+          detail: error.data?.message,
+          life: 3000,
+        });
+      });
   } catch (error) {
     console.error("Error adding admin:", error);
     toast.add({
@@ -712,8 +729,8 @@ const updateAdmin = async () => {
     }
 
     await $fetch(`/api/admin/edit/${selectedAdmin.value.admin_id}`, {
-      method: 'PUT',
-      body: editForm.value
+      method: "PUT",
+      body: editForm.value,
     });
 
     toast.add({
@@ -805,7 +822,7 @@ const deleteAdmin = async (admin: any) => {
   try {
     // Panggil API delete admin (perlu dibuat)
     await $fetch(`/api/admin/delete/${admin.admin_id}`, {
-      method: 'DELETE'
+      method: "DELETE",
     });
 
     toast.add({
@@ -835,9 +852,9 @@ const deleteSelectedAdmins = async () => {
       .map((admin: any) => admin.admin_id);
 
     // Panggil API delete multiple admins (perlu dibuat)
-    await $fetch('/api/admin/delete/bulk', {
-      method: 'DELETE',
-      body: { ids: adminIds }
+    await $fetch("/api/admin/delete/bulk", {
+      method: "DELETE",
+      body: { ids: adminIds },
     });
 
     toast.add({

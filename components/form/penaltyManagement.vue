@@ -188,7 +188,7 @@ const savePenaltySettings = async () => {
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: error.message || "Terjadi kesalahan saat menyimpan pengaturan denda",
+      detail: error.data?.message || "Terjadi kesalahan saat menyimpan pengaturan denda",
       life: 3000,
     });
   } finally {

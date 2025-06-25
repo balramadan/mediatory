@@ -186,7 +186,7 @@ const createMaintenance = async () => {
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: error.message || "Terjadi kesalahan saat membuat jadwal maintenance",
+      detail: error.data?.message || "Terjadi kesalahan saat membuat jadwal maintenance",
       life: 3000,
     });
   } finally {

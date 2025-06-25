@@ -167,11 +167,10 @@ const addEquipment = async () => {
     }
 
   } catch (error: any) {
-    console.error('Add equipment error:', error)
     toast.add({
       severity: "error",
       summary: "Gagal",
-      detail: error.message || "Terjadi kesalahan saat menambahkan peralatan",
+      detail: error.data?.message,
       life: 3000,
     })
   } finally {
