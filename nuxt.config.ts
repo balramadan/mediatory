@@ -39,9 +39,9 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
-    externals: {
-      external: ["process"],
-    },
+    replace: {
+      "import * as process": "import * as processUnused",
+    }
   },
   vite: {
     optimizeDeps: {
