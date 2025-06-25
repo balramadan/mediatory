@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "pinia-plugin-persistedstate/nuxt",
     "@vueuse/nuxt",
-    '@nuxt/test-utils/module'
+    "@nuxt/test-utils/module",
   ],
   build: {
     transpile: ["primevue"],
@@ -70,7 +70,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || "/api"
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || "/api",
     },
-  }
+  },
 });

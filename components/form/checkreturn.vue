@@ -181,6 +181,19 @@ const checkReturn = async () => {
   try {
     loading.value = true;
 
+    for (const item of equipments.value) {
+      if (item.condition === "good" && item.returned_quantity === 0) {
+        toast.add({
+          severity: "error",
+          summary: "Gagal",
+          detail: `Jumlah dikembalikan tidak boleh 0 jika kondisi "Baik" pada ${item.equipment.name}`,
+          life: 3000,
+        });
+        loading.value = false;
+        return;
+      }
+    }
+
     // Prepare data for submission
     const returnData = {
       transaction_id: props.transactionId,
@@ -194,33 +207,29 @@ const checkReturn = async () => {
     };
 
     // Send data to the server
-    const { data, error } = await useFetch("/api/transaction/returned/verify", {
+    await $fetch("/api/transaction/returned/verify", {
       method: "POST",
       body: returnData,
-    });
+    })
+      .then((res) => {
+        toast.add({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Verifikasi pengembalian berhasil",
+          life: 3000,
+        });
 
-    if (error.value) {
-      throw new Error(
-        error.value.message || "Gagal memverifikasi pengembalian"
-      );
-    }
-
-    toast.add({
-      severity: "success",
-      summary: "Berhasil",
-      detail: "Verifikasi pengembalian berhasil",
-      life: 3000,
-    });
-
-    // Emit completed event
-    emit("completed", data.value);
-  } catch (error) {
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: "Terjadi kesalahan saat memverifikasi pengembalian",
-      life: 3000,
-    });
+        // Emit completed event
+        emit("completed", res.data);
+      })
+      .catch((error) => {
+        toast.add({
+          severity: "error",
+          summary: "Gagal",
+          detail: error.data?.message,
+          life: 3000,
+        });
+      });
   } finally {
     loading.value = false;
   }

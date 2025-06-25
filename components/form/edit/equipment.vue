@@ -1,4 +1,3 @@
-<!-- filepath: c:\Users\iqbal\Documents\Iqbal\Programming\Skripsi\mediatory\components\form\edit\equipment.vue -->
 <template>
   <Form class="flex flex-col gap-5 mt-1" @submit="editEquipment">
     <FloatLabel variant="on">

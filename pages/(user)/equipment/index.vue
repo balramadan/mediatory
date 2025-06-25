@@ -196,6 +196,25 @@ const buttonAddToCart = (eq: any) => {
 };
 
 const addToCart = () => {
+  if (borrowQuantity.value < 1) {
+    toast.add({
+      severity: "error",
+      summary: "Gagal",
+      detail: "Jumlah yang ingin dipinjam harus lebih dari 0",
+      life: 3000,
+    });
+    return;
+  } else if (borrowQuantity.value > addEquipment.value.available_quantity) {
+    toast.add({
+      severity: "error",
+      summary: "Gagal",
+      detail:
+        "Jumlah yang ingin dipinjam tidak boleh melebihi jumlah alat yang tersedia",
+      life: 3000,
+    });
+    return;
+  }
+
   cartStore.addToCart({
     equipment_id: addEquipment.value.equipment_id,
     name: addEquipment.value.name,

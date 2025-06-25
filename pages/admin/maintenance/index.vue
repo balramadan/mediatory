@@ -84,7 +84,11 @@
         <LoadingVideo src="/loading.webm" :width="256" :height="256" />
       </template>
 
-      <Column field="maintenance_id" header="ID" sortable style="min-width: 6rem"></Column>
+      <Column field="maintenance_id" header="No" style="min-width: 6rem">
+        <template #body="slotProps">
+          {{ slotProps.index + 1 }}
+        </template>
+      </Column>
 
       <Column
         field="equipment.name"
@@ -196,7 +200,7 @@
       <div v-if="selectedMaintenance">
         <div class="field mb-4">
           <label class="font-bold">ID</label>
-          <div class="mt-1">{{ selectedMaintenance.id }}</div>
+          <div class="mt-1">{{ selectedMaintenance.maintenance_id }}</div>
         </div>
 
         <div class="field mb-4">
@@ -279,11 +283,18 @@
           <InputText v-else v-model="editForm.technician_name" class="mt-1" />
         </div>
 
-        <div class="field mb-4">
+        <div class="field mb-5 flex flex-col">
           <label class="font-bold">Deskripsi</label>
           <div v-if="viewMode" class="mt-1 whitespace-pre-line">
-            {{ selectedMaintenance.description || "Tidak ada deskripsi" }}
+            {{ selectedMaintenance || "Tidak ada deskripsi" }}
           </div>
+          <Textarea
+            v-else
+            v-model="selectedMaintenance.description"
+            rows="3"
+            class="mt-1"
+            placeholder="Tambahkan deskripsi"
+          />
         </div>
 
         <div class="flex flex-col mb-5">
@@ -316,7 +327,7 @@
           @click="closeDetailDialog"
           v-if="viewMode"
         />
-        <div v-else>
+        <div v-else class="flex flex-row gap-5">
           <Button
             label="Batal"
             icon="pi pi-times"
@@ -494,15 +505,15 @@ const updateMaintenanceRecord = async () => {
 
   try {
     const result = await maintenanceStore.updateMaintenance(
-      selectedMaintenance.value.id,
+      selectedMaintenance.value.maintenance_id,
       editForm
     );
 
     if (result.success) {
       toast.add({
         severity: "success",
-        summary: "Berhasil",
-        detail: "Pemeliharaan berhasil diperbarui",
+        summary: "Success",
+        detail: "Maintenance updated successfully",
         life: 3000,
       });
       closeDetailDialog();
@@ -511,7 +522,7 @@ const updateMaintenanceRecord = async () => {
       toast.add({
         severity: "error",
         summary: "Error",
-        detail: result.message || "Gagal memperbarui pemeliharaan",
+        detail: result.message || "Failed to update maintenance",
         life: 3000,
       });
     }
@@ -519,7 +530,7 @@ const updateMaintenanceRecord = async () => {
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: error.message || "Terjadi kesalahan",
+      detail: error.message || "An error occurred",
       life: 3000,
     });
   }
@@ -536,7 +547,7 @@ const finishMaintenance = async () => {
 
   try {
     const result = await maintenanceStore.updateMaintenance(
-      selectedMaintenance.value.id,
+      selectedMaintenance.value.maintenance_id,
       {
         status: StatusMaintenance.completed,
         notes: completeForm.notes,
