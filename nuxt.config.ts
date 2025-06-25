@@ -23,7 +23,6 @@ export default defineNuxtConfig({
     nuxtLayers: true,
   },
   image: {
-    provider: "static",
     dir: "public",
   },
   primevue: {
@@ -49,27 +48,8 @@ export default defineNuxtConfig({
     cacheDir: ".nuxt/.vite",
     clearScreen: false,
   },
-  nitro: {
-    storage: {
-      cache: {
-        driver: "fs",
-        base: ".nuxt/cache",
-      },
-    },
-    runtimeConfig: {
-      fetch: {
-        connectTimeout: 60000,
-        socketTimeout: 60000,
-      },
-    },
-  },
   typescript: {
     strict: true,
     typeCheck: false,
-  },
-  runtimeConfig: {
-    public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || "/api",
-    },
   },
 });
