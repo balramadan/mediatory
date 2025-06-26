@@ -2,12 +2,7 @@
   "framework": "nuxtjs",
   "buildCommand": "pnpm run build",
   "devCommand": "pnpm run dev",
-  "installCommand": "pnpm install",
-  "build": {
-    "env": {
-      "PRISMA_SKIP_POSTINSTALL_GENERATE": "true"
-    }
-  },
+  "installCommand": "pnpm install",  
   "rewrites": [
     {
       "source": "/(.*)",

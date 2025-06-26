@@ -1,7 +1,6 @@
-import { PrismaClient } from '../generated/prisma/client.js'
-// import { PrismaNeon } from '@prisma/adapter-neon'
+import { PrismaClient } from '~/generated/client/client'
+import { withAccelerate } from '@prisma/extension-accelerate'
 
-// const adapter = new PrismaNeon({ connectionString: process.env.POSTGRES_PRISMA_URL })
-const prisma = new PrismaClient()
+const prisma = new PrismaClient().$extends(withAccelerate())
 
 export default prisma

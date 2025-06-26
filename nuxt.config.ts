@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "pinia-plugin-persistedstate/nuxt",
     "@vueuse/nuxt",
-    "@nuxt/test-utils/module",
+    "@nuxt/test-utils/module"
   ],
   build: {
     transpile: ["primevue", "prisma", "@prisma/client"],
