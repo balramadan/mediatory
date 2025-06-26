@@ -1,18 +1,7 @@
 import { PrismaClient } from '~/generated/prisma/client.js'
+import { PrismaNeon } from '@prisma/adapter-neon'
 
-declare global {
-  // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined
-}
-
-let prisma: PrismaClient
-if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient()
-} else {
-  if (!global.prisma) {
-    global.prisma = new PrismaClient()
-  }
-  prisma = global.prisma
-}
+const adapter = new PrismaNeon({ connectionString: process.env.POSTGRES_PRISMA_URL })
+const prisma = new PrismaClient({ adapter })
 
 export default prisma

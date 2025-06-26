@@ -30,6 +30,7 @@
     "@primeuix/themes": "^1.1.2",
     "@primevue/core": "^4.3.5",
     "@primevue/forms": "^4.3.5",
+    "@prisma/adapter-neon": "^6.10.1",
     "@prisma/client": "6.10.1",
     "bcrypt": "^5.1.1",
     "chart.js": "^4.5.0",

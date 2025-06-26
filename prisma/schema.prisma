@@ -1,14 +1,15 @@
 generator client {
-  provider     = "prisma-client"
-  output       = "../generated/prisma"
-  binaryTargets = ["rhel-openssl-3.0.x"]
-  moduleFormat = "esm"
+  provider        = "prisma-client"
+  output          = "../generated/prisma"
+  previewFeatures = ["driverAdapters"]
+  binaryTargets   = ["rhel-openssl-3.0.x"]
+  moduleFormat    = "esm"
 }
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model users {
