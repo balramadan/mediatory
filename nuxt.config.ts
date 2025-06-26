@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     "@nuxt/test-utils/module",
   ],
   build: {
-    transpile: ["primevue"],
+    transpile: ["primevue", "prisma", "@prisma/client"],
   },
   css: ["~/assets/css/global.css"],
   unocss: {
