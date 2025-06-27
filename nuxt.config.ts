@@ -41,6 +41,9 @@ export default defineNuxtConfig({
   nitro: {
     replace: {
       "import * as process": "import * as processUnused",
+    },
+    experimental: {
+      wasm: true
     }
   },
   vite: {

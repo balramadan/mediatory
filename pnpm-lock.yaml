@@ -74,6 +74,9 @@ importers:
       primevue:
         specifier: ^4.3.5
         version: 4.3.5(vue@3.5.17(typescript@5.8.3))
+      prisma:
+        specifier: ^6.10.1
+        version: 6.10.1(typescript@5.8.3)
       sharp:
         specifier: ^0.34.2
         version: 0.34.2
@@ -126,9 +129,6 @@ importers:
       playwright-core:
         specifier: ^1.53.1
         version: 1.53.1
-      prisma:
-        specifier: 6.10.1
-        version: 6.10.1(typescript@5.8.3)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
