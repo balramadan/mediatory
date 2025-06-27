@@ -2,7 +2,12 @@
   "framework": "nuxtjs",
   "buildCommand": "pnpm run build",
   "devCommand": "pnpm run dev",
-  "installCommand": "pnpm install",  
+  "installCommand": "pnpm install",
+  "build": {
+    "env": {
+      "PRISMA_GENERATE_DATAPROXY": "false"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
