@@ -68,3 +68,5 @@ coverage
 tests
 *.test.js
 *.test.ts
+
+secrets.json

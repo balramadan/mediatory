@@ -1,22 +1,20 @@
 {
-  "name": "nuxt-app",
+  "name": "mediawi",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
+    "build": "nuxt prepare && prisma generate && nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "migrate": "prisma generate && prisma migrate dev",
     "init:test": "node tests/scripts/init-test-db.js",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "start": "node .output/server/index.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.835.0",
