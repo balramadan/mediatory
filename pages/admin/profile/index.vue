@@ -320,6 +320,9 @@ const updateProfile = async () => {
     await $fetch(`/api/admin/${adminStore.admin.id}`, {
       method: "PUT",
       body: updateData,
+    }).then(async (res: any) => {
+      adminStore.updateAdmin(res.data);
+      await fetchProfile();
     });
 
     // Confirm uploaded image

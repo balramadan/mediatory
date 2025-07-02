@@ -15,7 +15,7 @@
         <Password
           v-model="password"
           placeholder="Password"
-          input-class="w-100"
+          input-class="w-full sm:w-100"
           toggleMask
           required
         />
@@ -23,7 +23,7 @@
           v-model="confirmPassword"
           placeholder="Confirm Password"
           :feedback="false"
-          input-class="w-100"
+          input-class="w-full sm:w-100"
           toggleMask
           required
         />

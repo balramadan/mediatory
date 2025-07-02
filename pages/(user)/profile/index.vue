@@ -335,11 +335,9 @@ const updateProfile = async () => {
     await $fetch(`/api/user/${userStore.user.id}`, {
       method: "PUT",
       body: updateData,
-    }).then((res: any) => {
-      // Update userStore with new image URL
-      if (profileImageUrl.value) {
-        userStore.updateUser(res.data);
-      }
+    }).then(async (res: any) => {
+      userStore.updateUser(res.data);
+      await fetchProfile()
     });
 
     // Confirm uploaded image
