@@ -22,7 +22,7 @@
               v-for="(item, index) in slotProps.items"
               :key="index"
               :class="{
-                'border-t bordesurface-200 dark:border-surface-700':
+                'border-t border-surface-200 dark:border-surface-700':
                   index !== 0,
                 'py-5 px-10 flex flex-col sm:flex-row items-center gap-5': true,
               }"
