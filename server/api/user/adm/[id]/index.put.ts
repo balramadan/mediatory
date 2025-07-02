@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
     if (!userId) {
       throw createError({
         statusCode: 400,
-        statusMessage: "User ID is required",
+        message: "User ID is required",
       });
     }
 
@@ -95,7 +95,7 @@ export default defineEventHandler(async (event) => {
     }
     throw createError({
       statusCode: error.statusCode || 500,
-      message: error.statusMessage || "Internal server error",
+      message: error.message || "Internal server error",
     });
   }
 });

@@ -100,11 +100,6 @@
               >Sedang di cek</span
             >
             <span
-              v-if="slotProps.data.return_status === 'pending_check'"
-              class="text-orange-500 font-semibold"
-              >Sedang di cek</span
-            >
-            <span
               v-if="slotProps.data.return_status === 'returned_damaged'"
               class="text-red-500 font-semibold"
               >Ada kerusakan</span

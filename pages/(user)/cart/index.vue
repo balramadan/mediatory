@@ -14,6 +14,9 @@
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 py-5 px-10">
       <div class="sm:col-span-8 flex flex-col gap-5">
         <DataView :value="eq" dataKey="id" class="px-5 shadow">
+          <template #empty>
+            <p class="py-5">Tidak ada alat yang ditambah ke keranjang</p>
+          </template>
           <template #list="slotProps">
             <div
               v-for="(item, index) in slotProps.items"

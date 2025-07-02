@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     if (!category_id) {
       return createError({
         statusCode: 400,
-        statusMessage: "Category ID is required",
+        message: "Category ID is required",
       });
     }
 
@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
     if (!edit) {
       return createError({
         statusCode: 500,
-        statusMessage: "Failed to update category",
+        message: "Failed to update category",
       });
     }
 

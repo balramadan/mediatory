@@ -60,7 +60,7 @@
           </div>
           <div class="py-6">
             <Button
-              v-if="isFormValid"
+              v-if="isFormBorrowValid"
               severity="contrast"
               label="Selanjutnya"
               @click="activateCallback('2')"
@@ -143,6 +143,17 @@ const optionDuration = ref([
     value: 7,
   },
 ]);
+
+const isFormBorrowValid = computed(() => {
+  return (
+    project.value.trim() !== "" &&
+    purpose.value.trim() !== "" &&
+    borrowDate.value !== undefined &&
+    borrowDate.value !== null &&
+    duration.value !== undefined &&
+    duration.value !== null
+  );
+});
 
 const isFormValid = computed(() => {
   return (

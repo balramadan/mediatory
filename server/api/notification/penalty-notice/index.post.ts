@@ -113,7 +113,7 @@ export default defineEventHandler(async (event) => {
     console.error("Error sending penalty notice:", error);
     throw createError({
       statusCode: 500,
-      statusMessage: error.message || "Failed to send penalty notice",
+      message: error.message || "Failed to send penalty notice",
     });
   }
 });

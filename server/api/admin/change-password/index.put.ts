@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     if (!id) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Admin ID is required",
+        message: "Admin ID is required",
       });
     }
 
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     if (!isAdmin) {
       throw createError({
         statusCode: 401,
-        statusMessage: "Unauthorized",
+        message: "Unauthorized",
       });
     }
 
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     if (adminData.admin.id !== id) {
       throw createError({
         statusCode: 403,
-        statusMessage: "Forbidden: You can only change your own password",
+        message: "Forbidden: You can only change your own password",
       });
     }
 
@@ -38,14 +38,14 @@ export default defineEventHandler(async (event) => {
     if (!current_password || !new_password) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Current password and new password are required",
+        message: "Current password and new password are required",
       });
     }
 
     if (new_password.length < 6) {
       throw createError({
         statusCode: 400,
-        statusMessage: "New password must be at least 6 characters long",
+        message: "New password must be at least 6 characters long",
       });
     }
 
@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
     if (!admin) {
       throw createError({
         statusCode: 404,
-        statusMessage: "Admin not found",
+        message: "Admin not found",
       });
     }
 
@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
     if (!isCurrentPasswordValid) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Current password is incorrect",
+        message: "Current password is incorrect",
       });
     }
 
@@ -92,7 +92,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: 500,
-      statusMessage: "Internal server error",
+      message: "Internal server error",
     });
   }
 });

@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     if (!adminId) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Admin ID is required",
+        message: "Admin ID is required",
       });
     }
 
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     if (!isAdmin) {
       throw createError({
         statusCode: 401,
-        statusMessage: "Unauthorized",
+        message: "Unauthorized",
       });
     }
 
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     if (adminData.admin.id !== adminId && adminData.admin.role !== "superadmin") {
       throw createError({
         statusCode: 403,
-        statusMessage: "Forbidden: You can only update your own profile",
+        message: "Forbidden: You can only update your own profile",
       });
     }
 
@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
     if (!full_name || !email) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Full name and email are required",
+        message: "Full name and email are required",
       });
     }
 
@@ -84,7 +84,7 @@ export default defineEventHandler(async (event) => {
     if (!currentAdmin) {
       throw createError({
         statusCode: 404,
-        statusMessage: "User not found",
+        message: "User not found",
       });
     }
 
@@ -122,7 +122,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: 500,
-      statusMessage: "Internal server error",
+      message: "Internal server error",
     });
   }
 });

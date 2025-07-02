@@ -4,7 +4,6 @@ import { myPreset } from "./lib/preset";
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
-  ssr: true,
   modules: [
     "@nuxt/fonts",
     "@nuxt/image",
@@ -14,17 +13,16 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "pinia-plugin-persistedstate/nuxt",
     "@vueuse/nuxt",
-    "@nuxt/test-utils/module",
+    "@nuxt/test-utils/module"
   ],
   build: {
-    transpile: ["primevue"],
+    transpile: ["primevue", "prisma", "@prisma/client"],
   },
   css: ["~/assets/css/global.css"],
   unocss: {
     nuxtLayers: true,
   },
   image: {
-    provider: "ipx",
     dir: "public",
   },
   primevue: {
@@ -40,6 +38,14 @@ export default defineNuxtConfig({
       ripple: true,
     },
   },
+  nitro: {
+    replace: {
+      "import * as process": "import * as processUnused",
+    },
+    experimental: {
+      wasm: true
+    }
+  },
   vite: {
     optimizeDeps: {
       exclude: ["js-cookie"],
@@ -50,27 +56,8 @@ export default defineNuxtConfig({
     cacheDir: ".nuxt/.vite",
     clearScreen: false,
   },
-  nitro: {
-    storage: {
-      cache: {
-        driver: "fs",
-        base: ".nuxt/cache",
-      },
-    },
-    runtimeConfig: {
-      fetch: {
-        connectTimeout: 60000,
-        socketTimeout: 60000,
-      },
-    },
-  },
   typescript: {
     strict: true,
     typeCheck: false,
-  },
-  runtimeConfig: {
-    public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || "/api",
-    },
   },
 });

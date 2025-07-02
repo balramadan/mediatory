@@ -11,7 +11,7 @@
           v-model="password"
           placeholder="Password"
           :feedback="false"
-          input-class="w-100"
+          input-class="w-full sm:w-100"
           required
           toggleMask
         />

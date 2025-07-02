@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     if (!formData || formData.length === 0) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'No file uploaded'
+        message: 'No file uploaded'
       })
     }
 
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     if (!file.data || !file.filename) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Invalid file data'
+        message: 'Invalid file data'
       })
     }
 
@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
     if (!allowedTypes.includes(file.type || '')) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Invalid file type. Only images are allowed.'
+        message: 'Invalid file type. Only images are allowed.'
       })
     }
 
@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
     if (file.data.length > maxSize) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'File size too large. Maximum 5MB allowed.'
+        message: 'File size too large. Maximum 5MB allowed.'
       })
     }
 
@@ -58,7 +58,7 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     throw createError({
       statusCode: error.statusCode || 500,
-      statusMessage: error.statusMessage || 'Failed to upload file'
+      message: error.message || 'Failed to upload file'
     })
   }
 })

@@ -1,5 +1,4 @@
 import prisma from "~/lib/prisma";
-import { Prisma } from "~/generated/prisma";
 import { hash } from "bcrypt";
 
 export default defineEventHandler(async (event) => {
@@ -12,7 +11,7 @@ export default defineEventHandler(async (event) => {
     if (!isAdmin) {
       throw createError({
         statusCode: 401,
-        statusMessage: "Unauthorized",
+        message: "Unauthorized",
       });
     }
         
@@ -22,7 +21,7 @@ export default defineEventHandler(async (event) => {
     if (!full_name || !email || !password) {
       return createError({
         statusCode: 400,
-        statusMessage: "Missing required fields",
+        message: "Missing required fields",
       });
     }
 
@@ -41,7 +40,7 @@ export default defineEventHandler(async (event) => {
     if (!newAdmin) {
       return createError({
         statusCode: 500,
-        statusMessage: "Failed to create admin",
+        message: "Failed to create admin",
       });
     }
 
@@ -54,15 +53,6 @@ export default defineEventHandler(async (event) => {
       data: adminData,
     };
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        throw createError({
-          statusCode: 409,
-          statusMessage: "Email already exists",
-        });
-      }
-    }
-
     throw createError({
       statusCode: 500,
       message: "Internal server error",

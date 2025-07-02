@@ -1,6 +1,5 @@
 import prisma from "~/lib/prisma";
 import { hash } from "bcrypt";
-import { Prisma } from "~/generated/prisma";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -11,7 +10,7 @@ export default defineEventHandler(async (event) => {
     if (!adminId) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Admin ID is required",
+        message: "Admin ID is required",
       });
     }
 
@@ -23,7 +22,7 @@ export default defineEventHandler(async (event) => {
     if (!isAdmin) {
       throw createError({
         statusCode: 401,
-        statusMessage: "Unauthorized",
+        message: "Unauthorized",
       });
     }
 
@@ -31,7 +30,7 @@ export default defineEventHandler(async (event) => {
     if (adminData.admin.role !== "superadmin") {
       throw createError({
         statusCode: 403,
-        statusMessage: "Forbidden: Only superadmin can update other admins",
+        message: "Forbidden: Only superadmin can update other admins",
       });
     }
 
@@ -39,7 +38,7 @@ export default defineEventHandler(async (event) => {
     if (!full_name || !email) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Full name and email are required",
+        message: "Full name and email are required",
       });
     }
 
@@ -48,7 +47,7 @@ export default defineEventHandler(async (event) => {
     if (!emailRegex.test(email)) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid email format",
+        message: "Invalid email format",
       });
     }
 
@@ -56,7 +55,7 @@ export default defineEventHandler(async (event) => {
     if (role && !["superadmin", "inventory"].includes(role)) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid role. Must be 'superadmin' or 'inventory'",
+        message: "Invalid role. Must be 'superadmin' or 'inventory'",
       });
     }
 
@@ -68,7 +67,7 @@ export default defineEventHandler(async (event) => {
     if (!existingAdmin) {
       throw createError({
         statusCode: 404,
-        statusMessage: "Admin not found",
+        message: "Admin not found",
       });
     }
 
@@ -76,7 +75,7 @@ export default defineEventHandler(async (event) => {
     if (existingAdmin.role === "superadmin" && role && role !== "superadmin") {
       throw createError({
         statusCode: 403,
-        statusMessage: "Cannot downgrade superadmin role",
+        message: "Cannot downgrade superadmin role",
       });
     }
 
@@ -93,7 +92,7 @@ export default defineEventHandler(async (event) => {
     if (emailExists) {
       throw createError({
         statusCode: 409,
-        statusMessage: "Email already exists",
+        message: "Email already exists",
       });
     }
 
@@ -113,7 +112,7 @@ export default defineEventHandler(async (event) => {
       if (password.length < 6) {
         throw createError({
           statusCode: 400,
-          statusMessage: "Password must be at least 6 characters long",
+          message: "Password must be at least 6 characters long",
         });
       }
       updateData.password = await hash(password, 10);
@@ -142,20 +141,10 @@ export default defineEventHandler(async (event) => {
       data: updatedAdmin,
     };
   } catch (error) {
-    // Handle Prisma errors
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        throw createError({
-          statusCode: 409,
-          statusMessage: "Email already exists",
-        });
-      }
-    }
-
     console.error("Error updating admin:", error);
     throw createError({
       statusCode: 500,
-      statusMessage: "Internal server error",
+      message: "Internal server error",
     });
   }
 });

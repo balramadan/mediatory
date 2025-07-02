@@ -10,7 +10,7 @@
         rounded
         aria-label="Menu"
         severity="secondary"
-        class="sm:hidden"
+        class="block sm:hidden"
         @click.prevent="openDrawerUser"
       />
       <NuxtImg src="/logowi.png" height="30" />

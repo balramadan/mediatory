@@ -36,6 +36,15 @@ export const useAdminStore = defineStore("admin", {
       const cookies = useCookie("admin");
       cookies.value = null;
     },
+    updateAdmin(adminData: adminData) {
+      this.admin = {
+        id: adminData.admin_id,
+        name: adminData.full_name ?? "",
+        email: adminData.email ?? "",
+        role: adminData.role ?? "",
+        imgUrl: adminData.imgUrl ?? "",
+      };
+    },
   },
   persist: {
     storage: piniaPluginPersistedstate.cookies({

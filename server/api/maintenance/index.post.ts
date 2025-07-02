@@ -1,5 +1,5 @@
 import prisma from "~/lib/prisma";
-import { StatusMaintenance } from "~/generated/prisma/client";
+import { StatusMaintenance } from "~/generated/client/client";
 
 export default defineEventHandler(async (event) => {
   try {

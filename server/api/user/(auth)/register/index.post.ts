@@ -1,5 +1,4 @@
 import prisma from "~/lib/prisma";
-import { Prisma } from "~/generated/prisma";
 import { hash } from "bcrypt";
 
 export default defineEventHandler(async (event) => {
@@ -43,15 +42,6 @@ export default defineEventHandler(async (event) => {
       data: userData,
     };
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        throw createError({
-          statusCode: 409,
-          message: "Email already exists",
-        });
-      }
-    }
-
     throw createError({
       statusCode: 500,
       message: "Internal server error",
