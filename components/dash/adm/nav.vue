@@ -4,15 +4,17 @@
   >
     <div id="logo" class="flex items-center gap-3">
       <!-- Mobile Menu Button -->
-      <Button
-        icon="i-material-symbols:menu"
-        variant="text"
-        rounded
-        aria-label="Menu"
-        severity="secondary"
-        class="block sm:hidden"
-        @click.prevent="openDrawer"
-      />
+       <div class="block sm:hidden">
+         <Button
+           icon="i-material-symbols:menu"
+           variant="text"
+           rounded
+           aria-label="Menu"
+           severity="secondary"
+           @click.prevent="openDrawer"
+         />
+
+       </div>
       <NuxtImg src="/logowi.png" height="30" />
     </div>
 

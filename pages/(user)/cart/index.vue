@@ -87,8 +87,8 @@
         </DataView>
       </div>
       <div class="sm:col-span-4 py-5 shadow">
-        <h2 class="mx-5 font-bold text-xl">Informasi</h2>
-        <FormAddBorrow class="mx-5" />
+        <h3 class="mx-5 font-semibold text-lg">Isi Informasi Terkait</h3>
+        <FormAddBorrow class="px-5" />
       </div>
     </div>
   </div>

@@ -72,7 +72,7 @@
       <StepItem value="2">
         <Step>Syarat & Ketentuan</Step>
         <StepPanel v-slot="{ activateCallback }">
-          <div class="p-5 border-1 border-solid">
+          <div class="">
             <Syarat />
             <div class="mt-5 flex flex-row gap-2 items-center">
               <Checkbox v-model="checked" binary />
