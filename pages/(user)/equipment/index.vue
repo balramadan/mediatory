@@ -21,6 +21,8 @@
       :value="equipment"
       :loading="loading"
       :rows="6"
+      :filters="filters"
+      :globalFilterFields="['name', 'status', 'category.category_name', 'available_quantity']"
     >
       <template #header>
         <div class="flex flex-wrap justify-between items-center gap-5">
@@ -29,7 +31,7 @@
             <InputIcon>
               <div class="i-material-symbols:search" />
             </InputIcon>
-            <InputText placeholder="Search..." />
+            <InputText v-model="filters['global'].value" placeholder="Search..." />
           </IconField>
         </div>
       </template>
@@ -41,7 +43,7 @@
         ><LoadingVideo src="/loading.webm" :width="256" :height="256"
       /></template>
 
-      <Column field="imgUrl">
+      <Column field="imgUrl" class="w-32">
         <template #body="slotProps">
           <Image v-if="slotProps.data.imgUrl" preview>
             <template #image>
@@ -162,9 +164,15 @@
 </template>
 
 <script lang="ts" setup>
+import { FilterMatchMode } from "@primevue/core/api";
+
 const toast = useToast();
 const eqStore = useEquipmentStore();
 const cartStore = useCartStore();
+
+const filters = ref({
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+});
 
 const loading = ref(false);
 const dt = ref();

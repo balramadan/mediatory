@@ -70,3 +70,5 @@ tests
 *.test.ts
 
 secrets.json
+dump.vue
+server/schema.json

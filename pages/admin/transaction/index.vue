@@ -2,18 +2,49 @@
   <div>
     <Toolbar class="mb-5 items-center">
       <template #start>
-        <!-- Filter Bulan -->
-        <div class="flex gap-2 items-center">
-          <label class="font-medium">Filter Bulan:</label>
-          <Select
-            v-model="selectedMonth"
-            :options="monthOptions"
-            option-label="label"
-            option-value="value"
-            placeholder="Pilih Bulan"
-            show-clear
-            @change="onMonthChange"
-            class="w-48"
+        <!-- Filter Bulan dan Tahun -->
+        <div class="flex gap-4 items-center">
+          <label class="font-medium">Filter Periode:</label>
+          
+          <!-- Filter Tahun -->
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-gray-500">Tahun</label>
+            <Select
+              v-model="selectedYear"
+              :options="yearOptions"
+              option-label="label"
+              option-value="value"
+              placeholder="Pilih Tahun"
+              show-clear
+              @change="onFilterChange"
+              class="w-32"
+            />
+          </div>
+          
+          <!-- Filter Bulan -->
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-gray-500">Bulan</label>
+            <Select
+              v-model="selectedMonth"
+              :options="monthOptions"
+              option-label="label"
+              option-value="value"
+              placeholder="Pilih Bulan"
+              show-clear
+              @change="onFilterChange"
+              class="w-40"
+            />
+          </div>
+          
+          <!-- Reset Filter Button -->
+          <Button
+            v-if="selectedYear || selectedMonth"
+            icon="i-material-symbols:filter-alt-off"
+            severity="secondary"
+            text
+            @click="resetPeriodFilter"
+            v-tooltip="'Reset Filter Periode'"
+            class="mt-4"
           />
         </div>
       </template>
@@ -262,7 +293,10 @@ const filters = ref({
 const dt = ref();
 const transactions = ref();
 const loading = ref(false);
-const selectedMonth = ref(null);
+
+// Separate filters for month and year
+const selectedYear = ref<number | null>(null);
+const selectedMonth = ref<number | null>(null);
 
 const refreshTransaction = async () => {
   loading.value = true;
@@ -280,38 +314,39 @@ const refreshTransaction = async () => {
     });
 };
 
-// Options untuk dropdown bulan
-const monthOptions = ref([
-  { label: "Januari", value: 0 },
-  { label: "Februari", value: 1 },
-  { label: "Maret", value: 2 },
-  { label: "April", value: 3 },
-  { label: "Mei", value: 4 },
-  { label: "Juni", value: 5 },
-  { label: "Juli", value: 6 },
-  { label: "Agustus", value: 7 },
-  { label: "September", value: 8 },
-  { label: "Oktober", value: 9 },
-  { label: "November", value: 10 },
-  { label: "Desember", value: 11 },
-]);
-
-// Options untuk filter kolom (dengan tahun)
-const monthFilterOptions = computed(() => {
+// Options untuk dropdown tahun
+const yearOptions = computed(() => {
   const currentYear = new Date().getFullYear();
-  const years = [currentYear - 1, currentYear, currentYear + 1];
-
-  const options: Array<{ label: string; value: string }> = [];
-  years.forEach((year) => {
-    monthOptions.value.forEach((month) => {
-      options.push({
-        label: `${month.label} ${year}`,
-        value: `${year}-${month.value}`,
-      });
+  const years = [];
+  
+  // Generate years from 2 years ago to 1 year in the future
+  for (let year = currentYear - 2; year <= currentYear + 1; year++) {
+    years.push({
+      label: year.toString(),
+      value: year
     });
-  });
+  }
+  
+  // Sort from newest to oldest
+  return years.sort((a, b) => b.value - a.value);
+});
 
-  return options;
+// Options untuk dropdown bulan
+const monthOptions = computed(() => {
+  return [
+    { label: "Januari", value: 0 },
+    { label: "Februari", value: 1 },
+    { label: "Maret", value: 2 },
+    { label: "April", value: 3 },
+    { label: "Mei", value: 4 },
+    { label: "Juni", value: 5 },
+    { label: "Juli", value: 6 },
+    { label: "Agustus", value: 7 },
+    { label: "September", value: 8 },
+    { label: "Oktober", value: 9 },
+    { label: "November", value: 10 },
+    { label: "Desember", value: 11 },
+  ];
 });
 
 // Computed property untuk mengurutkan transaksi
@@ -328,30 +363,71 @@ const sortedTransactions = computed(() => {
   });
 });
 
-// Filter berdasarkan bulan yang dipilih
+// Filter berdasarkan tahun dan bulan yang dipilih
 const filteredTransactions = computed(() => {
   let result = sortedTransactions.value;
 
-  // Filter berdasarkan bulan yang dipilih dari dropdown utama
-  if (selectedMonth.value !== null) {
+  // Filter berdasarkan tahun dan/atau bulan yang dipilih
+  if (selectedYear.value !== null || selectedMonth.value !== null) {
     result = result.filter((transaction) => {
       const borrowDate = new Date(transaction.borrow_date);
-      return borrowDate.getMonth() === selectedMonth.value;
+      
+      // Filter berdasarkan tahun jika dipilih
+      if (selectedYear.value !== null) {
+        if (borrowDate.getFullYear() !== selectedYear.value) {
+          return false;
+        }
+      }
+      
+      // Filter berdasarkan bulan jika dipilih
+      if (selectedMonth.value !== null) {
+        if (borrowDate.getMonth() !== selectedMonth.value) {
+          return false;
+        }
+      }
+      
+      return true;
     });
   }
 
   return result;
 });
 
-// Handle perubahan bulan
-const onMonthChange = () => {
-  // Logic filter sudah ada di computed filteredTransactions
-  console.log(`Filter bulan: ${selectedMonth.value}`);
+// Handle perubahan filter
+const onFilterChange = () => {
+  const monthNames = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+  
+  if (selectedYear.value || selectedMonth.value) {
+    let filterInfo = "Filter periode: ";
+    if (selectedMonth.value !== null) {
+      filterInfo += monthNames[selectedMonth.value];
+    }
+    if (selectedYear.value !== null) {
+      if (selectedMonth.value !== null) {
+        filterInfo += ` ${selectedYear.value}`;
+      } else {
+        filterInfo += `Tahun ${selectedYear.value}`;
+      }
+    }
+    console.log(filterInfo);
+  } else {
+    console.log("Filter periode dihapus - menampilkan semua data");
+  }
+};
+
+// Reset filter periode
+const resetPeriodFilter = () => {
+  selectedYear.value = null;
+  selectedMonth.value = null;
+  console.log("Filter periode direset");
 };
 
 // Reset semua filter
 const resetFilters = () => {
-  selectedMonth.value = null;
+  resetPeriodFilter();
   filters.value = {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     status: { value: null, matchMode: FilterMatchMode.EQUALS },
@@ -363,6 +439,35 @@ const resetFilters = () => {
   if (dt.value) {
     dt.value.clearFilters();
   }
+};
+
+// Update fungsi exportCSV
+const exportCSV = () => {
+  let fileName = "transactions";
+  
+  const monthNames = [
+    "januari", "februari", "maret", "april", "mei", "juni",
+    "juli", "agustus", "september", "oktober", "november", "desember"
+  ];
+  
+  // Build filename based on selected filters
+  if (selectedYear.value || selectedMonth.value) {
+    const parts = [];
+    if (selectedMonth.value !== null) {
+      parts.push(monthNames[selectedMonth.value]);
+    }
+    if (selectedYear.value !== null) {
+      parts.push(selectedYear.value.toString());
+    }
+    fileName += `-${parts.join("-")}`;
+  } else {
+    fileName += "-all";
+  }
+
+  dt.value.exportCSV({
+    selectionOnly: false,
+    fileName: `${fileName}-${new Date().toISOString().split("T")[0]}.csv`,
+  });
 };
 
 onMounted(async () => {
@@ -385,17 +490,6 @@ const returnStatusOptions = ref([
   "returned_incomplete",
   "returned_complete",
 ]);
-
-const exportCSV = () => {
-  dt.value.exportCSV({
-    selectionOnly: false,
-    fileName: `transactions-${
-      selectedMonth.value !== null
-        ? monthOptions.value[selectedMonth.value].label
-        : "all"
-    }-${new Date().toISOString()}.csv`,
-  });
-};
 
 definePageMeta({
   layout: "dashadm",
