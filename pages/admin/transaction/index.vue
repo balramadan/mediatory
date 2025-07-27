@@ -5,7 +5,7 @@
         <!-- Filter Bulan dan Tahun -->
         <div class="flex gap-4 items-center">
           <label class="font-medium">Filter Periode:</label>
-          
+
           <!-- Filter Tahun -->
           <div class="flex flex-col gap-1">
             <label class="text-xs text-gray-500">Tahun</label>
@@ -20,7 +20,7 @@
               class="w-32"
             />
           </div>
-          
+
           <!-- Filter Bulan -->
           <div class="flex flex-col gap-1">
             <label class="text-xs text-gray-500">Bulan</label>
@@ -35,7 +35,7 @@
               class="w-40"
             />
           </div>
-          
+
           <!-- Reset Filter Button -->
           <Button
             v-if="selectedYear || selectedMonth"
@@ -50,6 +50,14 @@
       </template>
       <template #end>
         <div class="flex items-center gap-2 mt-4 md:mt-0">
+          <Button
+            label="Hapus Terpilih"
+            icon="i-material-symbols:delete"
+            severity="danger"
+            variant="outlined"
+            @click="confirmDeleteSelected"
+            :disabled="!selectedTransactions || !selectedTransactions.length"
+          />
           <Button
             icon="i-solar:refresh-bold"
             @click="refreshTransaction"
@@ -69,6 +77,7 @@
     <DataTable
       ref="dt"
       v-model:filters="filters"
+      v-model:selection="selectedTransactions"
       show-gridlines
       striped-rows
       paginator
@@ -83,6 +92,7 @@
       ]"
       tableStyle="min-width: 50rem"
       filterDisplay="row"
+      data-key="transaction_id"
     >
       <template #header>
         <div class="flex flex-wrap justify-between items-center gap-5">
@@ -106,6 +116,8 @@
       <template #loading>
         <LoadingVideo src="/loading.webm" :width="256" :height="256" />
       </template>
+
+      <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
 
       <Column field="urgent" class="min-w-9rem">
         <template #body="slotProps">
@@ -261,7 +273,7 @@
       </Column>
 
       <Column :exportable="false">
-        <template #body="slotProps">
+        <template #body="slotProps" class="flex flex-row">
           <Button
             icon="i-material-symbols:folder-open"
             outlined
@@ -273,15 +285,98 @@
               )
             "
           />
+          <Button
+            icon="i-material-symbols:delete-forever"
+            outlined
+            rounded
+            severity="danger"
+            @click="confirmDeleteTransaction(slotProps.data)"
+            :disabled="!canDeleteTransaction(slotProps.data)"
+          />
         </template>
       </Column>
     </DataTable>
+
+    <!-- Delete Single Transaction Dialog -->
+    <Dialog
+      v-model:visible="deleteTransactionDialog"
+      modal
+      header="Konfirmasi Hapus Transaksi"
+      :style="{ width: '30rem' }"
+    >
+      <div class="confirmation-content">
+        <i class="i-material-symbols:warning mr-3" style="font-size: 2rem; color: #f59e0b" />
+        <div>
+          <p class="mb-2">Anda yakin ingin menghapus transaksi ini?</p>
+          <p class="text-sm text-gray-600 mb-2">
+            <strong>ID:</strong> #{{ selectedTransaction?.transaction_id }}
+          </p>
+          <p class="text-sm text-gray-600 mb-2">
+            <strong>User:</strong> {{ selectedTransaction?.user?.full_name }}
+          </p>
+          <div class="bg-yellow-50 border border-yellow-200 rounded p-3 mt-3">
+            <p class="text-sm text-yellow-800">
+              <strong>Peringatan:</strong> Menghapus transaksi akan menghapus semua data terkait termasuk detail transaksi, detail pengembalian, dan notifikasi.
+            </p>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <Button
+          label="Batal"
+          icon="i-material-symbols:close"
+          text
+          @click="deleteTransactionDialog = false"
+        />
+        <Button 
+          label="Hapus" 
+          icon="i-material-symbols:check" 
+          severity="danger"
+          @click="deleteTransaction" 
+        />
+      </template>
+    </Dialog>
+
+    <!-- Delete Multiple Transactions Dialog -->
+    <Dialog
+      v-model:visible="deleteTransactionsDialog"
+      modal
+      header="Konfirmasi Hapus Transaksi"
+      :style="{ width: '35rem' }"
+    >
+      <div class="confirmation-content">
+        <i class="i-material-symbols:warning mr-3" style="font-size: 2rem; color: #f59e0b" />
+        <div>
+          <p class="mb-2">Anda yakin ingin menghapus {{ selectedTransactions.length }} transaksi?</p>
+          <div class="bg-yellow-50 border border-yellow-200 rounded p-3 mt-3">
+            <p class="text-sm text-yellow-800">
+              <strong>Peringatan:</strong> Menghapus transaksi akan menghapus semua data terkait dan tidak dapat dikembalikan.
+            </p>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <Button
+          label="Batal"
+          icon="i-material-symbols:close"
+          text
+          @click="deleteTransactionsDialog = false"
+        />
+        <Button 
+          label="Hapus Semua" 
+          icon="i-material-symbols:check" 
+          severity="danger"
+          @click="deleteSelectedTransactions" 
+        />
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { FilterMatchMode, FilterOperator } from "@primevue/core/api";
 
+const toast = useToast();
 const trStore = useTransactionStore();
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -318,15 +413,15 @@ const refreshTransaction = async () => {
 const yearOptions = computed(() => {
   const currentYear = new Date().getFullYear();
   const years = [];
-  
+
   // Generate years from 2 years ago to 1 year in the future
   for (let year = currentYear - 2; year <= currentYear + 1; year++) {
     years.push({
       label: year.toString(),
-      value: year
+      value: year,
     });
   }
-  
+
   // Sort from newest to oldest
   return years.sort((a, b) => b.value - a.value);
 });
@@ -371,21 +466,21 @@ const filteredTransactions = computed(() => {
   if (selectedYear.value !== null || selectedMonth.value !== null) {
     result = result.filter((transaction) => {
       const borrowDate = new Date(transaction.borrow_date);
-      
+
       // Filter berdasarkan tahun jika dipilih
       if (selectedYear.value !== null) {
         if (borrowDate.getFullYear() !== selectedYear.value) {
           return false;
         }
       }
-      
+
       // Filter berdasarkan bulan jika dipilih
       if (selectedMonth.value !== null) {
         if (borrowDate.getMonth() !== selectedMonth.value) {
           return false;
         }
       }
-      
+
       return true;
     });
   }
@@ -396,10 +491,20 @@ const filteredTransactions = computed(() => {
 // Handle perubahan filter
 const onFilterChange = () => {
   const monthNames = [
-    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
   ];
-  
+
   if (selectedYear.value || selectedMonth.value) {
     let filterInfo = "Filter periode: ";
     if (selectedMonth.value !== null) {
@@ -441,15 +546,158 @@ const resetFilters = () => {
   }
 };
 
+const selectedTransactions = ref<any[]>([]);
+const deleteTransactionDialog = ref(false);
+const deleteTransactionsDialog = ref(false);
+const selectedTransaction = ref<any>(null);
+
+const canDeleteTransaction = (transaction: any) => {
+  // Only allow deletion for cancelled, rejected, or completed transactions
+  const deletableStatuses = ['cancelled', 'rejected', 'completed'];
+  return deletableStatuses.includes(transaction.status);
+};
+
+// Confirm delete single transaction
+const confirmDeleteTransaction = (transaction: any) => {
+  if (!canDeleteTransaction(transaction)) {
+    toast.add({
+      severity: "warn",
+      summary: "Tidak Diizinkan",
+      detail: "Hanya transaksi yang dibatalkan, ditolak, atau selesai yang dapat dihapus",
+      life: 3000,
+    });
+    return;
+  }
+  
+  selectedTransaction.value = transaction;
+  deleteTransactionDialog.value = true;
+};
+
+// Confirm delete multiple transactions
+const confirmDeleteSelected = () => {
+  if (!selectedTransactions.value || selectedTransactions.value.length === 0) {
+    toast.add({
+      severity: "warn",
+      summary: "Warning",
+      detail: "Tidak ada transaksi yang dipilih",
+      life: 3000,
+    });
+    return;
+  }
+
+  // Check if all selected transactions can be deleted
+  const undeletableTransactions = selectedTransactions.value.filter(
+    (transaction) => !canDeleteTransaction(transaction)
+  );
+
+  if (undeletableTransactions.length > 0) {
+    toast.add({
+      severity: "warn",
+      summary: "Tidak Diizinkan",
+      detail: `${undeletableTransactions.length} transaksi tidak dapat dihapus karena statusnya masih aktif`,
+      life: 3000,
+    });
+    return;
+  }
+
+  deleteTransactionsDialog.value = true;
+};
+
+// Delete single transaction
+const deleteTransaction = async () => {
+  try {
+    const res = await $fetch<{
+      statusCode: number;
+      message: string;
+      deletedTransaction?: { id: number; user: string };
+    }>("/api/transaction/delete?multiple=false", {
+      method: "DELETE",
+      body: { id: selectedTransaction.value.transaction_id },
+      credentials: "include",
+    });
+
+    if (res.statusCode === 200) {
+      toast.add({
+        severity: "success",
+        summary: "Berhasil",
+        detail: `Transaksi #${selectedTransaction.value.transaction_id} berhasil dihapus`,
+        life: 3000,
+      });
+      await refreshTransaction();
+    }
+  } catch (err: any) {
+    console.error("Delete transaction error:", err);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: err.data?.message || err.message || "Gagal menghapus transaksi",
+      life: 3000,
+    });
+  } finally {
+    deleteTransactionDialog.value = false;
+    selectedTransaction.value = null;
+  }
+};
+
+// Delete multiple transactions
+const deleteSelectedTransactions = async () => {
+  try {
+    const selected = selectedTransactions.value.map(
+      (transaction) => transaction.transaction_id
+    );
+
+    const res = await $fetch<{
+      statusCode: number;
+      message: string;
+      deletedCount?: number;
+    }>("/api/transaction/delete?multiple=true", {
+      method: "DELETE",
+      body: { ids: selected },
+      credentials: "include",
+    });
+
+    if (res.statusCode === 200) {
+      toast.add({
+        severity: "success",
+        summary: "Berhasil",
+        detail: `${res.deletedCount || selected.length} transaksi berhasil dihapus`,
+        life: 3000,
+      });
+      await refreshTransaction();
+      selectedTransactions.value = [];
+    }
+  } catch (err: any) {
+    console.error("Delete transactions error:", err);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: err.data?.message || err.message || "Gagal menghapus transaksi",
+      life: 3000,
+    });
+  } finally {
+    deleteTransactionsDialog.value = false;
+  }
+};
+
 // Update fungsi exportCSV
 const exportCSV = () => {
   let fileName = "transactions";
-  
+
   const monthNames = [
-    "januari", "februari", "maret", "april", "mei", "juni",
-    "juli", "agustus", "september", "oktober", "november", "desember"
+    "januari",
+    "februari",
+    "maret",
+    "april",
+    "mei",
+    "juni",
+    "juli",
+    "agustus",
+    "september",
+    "oktober",
+    "november",
+    "desember",
   ];
-  
+
   // Build filename based on selected filters
   if (selectedYear.value || selectedMonth.value) {
     const parts = [];

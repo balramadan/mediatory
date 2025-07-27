@@ -2,6 +2,13 @@
   <div>
     <Toolbar class="mb-5">
       <template #end>
+        <Button
+          icon="i-solar:refresh-bold"
+          @click="refreshEquipment"
+          variant="outlined"
+          severity="secondary"
+          class="mr-2.5"
+        />
         <OverlayBadge :value="cart" severity="contrast" class="mr-5">
           <Button
             icon="i-material-symbols:shopping-cart"
@@ -22,7 +29,12 @@
       :loading="loading"
       :rows="6"
       :filters="filters"
-      :globalFilterFields="['name', 'status', 'category.category_name', 'available_quantity']"
+      :globalFilterFields="[
+        'name',
+        'status',
+        'category.category_name',
+        'available_quantity',
+      ]"
     >
       <template #header>
         <div class="flex flex-wrap justify-between items-center gap-5">
@@ -31,7 +43,10 @@
             <InputIcon>
               <div class="i-material-symbols:search" />
             </InputIcon>
-            <InputText v-model="filters['global'].value" placeholder="Search..." />
+            <InputText
+              v-model="filters['global'].value"
+              placeholder="Search..."
+            />
           </IconField>
         </div>
       </template>

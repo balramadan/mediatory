@@ -47,7 +47,7 @@
     >
       <template #empty>
         <div class="flex flex-col items-center justify-center py-4">
-          <i class="pi pi-cloud-upload text-4xl text-gray-400 mb-2"></i>
+          <i class="i-material-symbols:upload text-4xl text-gray-400 mb-2"></i>
           <p class="text-gray-600">
             Drag and drop gambar di sini atau klik untuk memilih
           </p>

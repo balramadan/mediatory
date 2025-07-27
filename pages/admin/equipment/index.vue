@@ -21,6 +21,13 @@
 
       <template #end>
         <Button
+          icon="i-solar:refresh-bold"
+          @click="refreshEquipment"
+          variant="outlined"
+          severity="secondary"
+          class="mr-2.5"
+        />
+        <Button
           label="Export"
           icon="i-material-symbols:upload"
           severity="secondary"
@@ -99,7 +106,12 @@
 
       <Column field="quantity" header="Jumlah Total" sortable />
 
-      <Column field="category.category_name" header="Category" sortable class="min-w-15rem" />
+      <Column
+        field="category.category_name"
+        header="Category"
+        sortable
+        class="min-w-15rem"
+      />
 
       <Column field="status" header="Status Alat" class="text-base">
         <template #body="slotProps">
@@ -175,21 +187,26 @@
     <Dialog
       v-model:visible="deleteEquipmentDialog"
       modal
-      header="Confirm"
+      header="Konfirmasi"
       :style="{ width: '25rem' }"
     >
       <div class="confirmation-content">
-        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-        <span>Are you sure you want to delete this equipment?</span>
+        <div class="i-material-symbols:warning mr-3" style="font-size: 2rem" />
+        <span>Anda yakin ingin menghapus alat?</span>
       </div>
       <template #footer>
         <Button
-          label="No"
-          icon="pi pi-times"
+          label="Tidak"
+          icon="i-material-symbols:close"
           text
           @click="deleteEquipmentDialog = false"
         />
-        <Button label="Yes" icon="pi pi-check" text @click="deleteEquipment" />
+        <Button
+          label="Ya"
+          icon="i-material-symbols:check"
+          text
+          @click="deleteEquipment"
+        />
       </template>
     </Dialog>
 
@@ -197,23 +214,23 @@
     <Dialog
       v-model:visible="deleteEquipmentsDialog"
       modal
-      header="Confirm"
+      header="Konfirmasi"
       :style="{ width: '25rem' }"
     >
       <div class="confirmation-content">
-        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-        <span>Are you sure you want to delete the selected equipment?</span>
+        <div class="i-material-symbols:warning mr-3" style="font-size: 2rem" />
+        <span>Apakah yakin ingin menghapus alat-alat?</span>
       </div>
       <template #footer>
         <Button
-          label="No"
-          icon="pi pi-times"
+          label="Tidak"
+          icon="i-material-symbols:close"
           text
           @click="deleteEquipmentsDialog = false"
         />
         <Button
-          label="Yes"
-          icon="pi pi-check"
+          label="Ya"
+          icon="i-material-symbols:check"
           text
           @click="deleteSelectedEquipment"
         />
@@ -248,7 +265,10 @@ const addEquipmentRef = ref();
 const editEquipmentRef = ref();
 
 const refreshEquipment = async () => {
-  await storeEquipment.getEquipment();
+  loading.value = true;
+  await storeEquipment.getEquipment().finally(() => {
+    loading.value = false;
+  });
   equipment.value = storeEquipment.equipment;
 };
 

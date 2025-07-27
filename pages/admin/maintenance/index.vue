@@ -285,8 +285,8 @@
 
         <div class="field mb-5 flex flex-col">
           <label class="font-bold">Deskripsi</label>
-          <div v-if="viewMode" class="mt-1 whitespace-pre-line">
-            {{ selectedMaintenance || "Tidak ada deskripsi" }}
+          <div v-if="viewMode" class="mt-1">
+            {{ selectedMaintenance.description || "Tidak ada deskripsi" }}
           </div>
           <Textarea
             v-else
@@ -322,7 +322,7 @@
       <template #footer>
         <Button
           label="Tutup"
-          icon="pi pi-times"
+          icon="i-material-symbols:close"
           class="p-button-text"
           @click="closeDetailDialog"
           v-if="viewMode"
@@ -330,11 +330,11 @@
         <div v-else class="flex flex-row gap-5">
           <Button
             label="Batal"
-            icon="pi pi-times"
+            icon="i-material-symbols:close"
             class="p-button-text"
             @click="closeDetailDialog"
           />
-          <Button label="Simpan" icon="pi pi-check" @click="updateMaintenanceRecord" />
+          <Button label="Simpan" icon="i-material-symbols:save" @click="updateMaintenanceRecord" />
         </div>
       </template>
     </Dialog>
@@ -360,7 +360,7 @@
           unit ke stok yang tersedia.
         </p>
 
-        <div class="field mb-4">
+        <div class="field mb-4 flex flex-col">
           <label for="complete-notes" class="font-bold">Catatan Penyelesaian</label>
           <Textarea
             id="complete-notes"
@@ -375,13 +375,13 @@
       <template #footer>
         <Button
           label="Batal"
-          icon="pi pi-times"
+          icon="i-material-symbols:close"
           class="p-button-text"
           @click="completeMaintenanceDialog = false"
         />
         <Button
           label="Selesaikan"
-          icon="pi pi-check"
+          icon="i-material-symbols:check"
           class="p-button-success"
           @click="finishMaintenance"
         />

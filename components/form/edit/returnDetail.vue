@@ -154,7 +154,7 @@ const saveChanges = async () => {
       }))
     };
 
-    await $fetch('/api/transaction/return/update', {
+    await $fetch('/api/transaction/returned/update', {
       method: 'PUT',
       body: updateData,
     }).then((response: any) => {

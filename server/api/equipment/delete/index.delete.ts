@@ -16,23 +16,47 @@ export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event);
     const { multiple } = getQuery(event);
-    const { id, ids } = body; // Support both id and ids
+    const { id, ids } = body;
+
+    // Helper function to check if equipment can be deleted
+    const checkEquipmentCanBeDeleted = async (equipmentId: string) => {
+      // Check if equipment is used in any transactions
+      const transactionCount = await prisma.transactionDetail.count({
+        where: { equipment_id: equipmentId },
+      });
+
+      // Check if equipment has any return records
+      const returnCount = await prisma.returnDetail.count({
+        where: { equipment_id: equipmentId },
+      });
+
+      // Check if equipment is in maintenance
+      const maintenanceCount = await prisma.maintenance.count({
+        where: { equipment_id: equipmentId },
+      });
+
+      return {
+        canDelete:
+          transactionCount === 0 && returnCount === 0 && maintenanceCount === 0,
+        transactionCount,
+        returnCount,
+        maintenanceCount,
+      };
+    };
 
     // Helper function to extract image key from URL
     const extractImageKeyFromUrl = (imgUrl: string): string | null => {
       if (!imgUrl) return null;
       try {
-        // Extract key from Supabase storage URL
         const url = new URL(imgUrl);
-        const pathParts = url.pathname.split('/');
-        const bucketIndex = pathParts.indexOf('public') + 1;
+        const pathParts = url.pathname.split("/");
+        const bucketIndex = pathParts.indexOf("public") + 1;
         if (bucketIndex > 0 && bucketIndex < pathParts.length) {
-          // Join the remaining parts to get the full key
-          return pathParts.slice(bucketIndex + 1).join('/');
+          return pathParts.slice(bucketIndex + 1).join("/");
         }
         return null;
       } catch (error) {
-        console.error('Error extracting image key from URL:', error);
+        console.error("Error extracting image key from URL:", error);
         return null;
       }
     };
@@ -44,10 +68,9 @@ export default defineEventHandler(async (event) => {
         if (imageKey) {
           try {
             await UploadService.deleteFile(imageKey);
-            console.log('Image deleted from storage:', imageKey);
+            console.log("Image deleted from storage:", imageKey);
           } catch (error) {
-            console.error('Failed to delete image from storage:', error);
-            // Don't throw error here, continue with equipment deletion
+            console.error("Failed to delete image from storage:", error);
           }
         }
       }
@@ -55,8 +78,8 @@ export default defineEventHandler(async (event) => {
 
     if (multiple === "true" || multiple === true) {
       // Handle multiple deletion
-      const equipmentIds = ids || id; // Support both 'ids' and 'id' for array
-      
+      const equipmentIds = ids || id;
+
       if (!Array.isArray(equipmentIds)) {
         return createError({
           statusCode: 400,
@@ -66,33 +89,51 @@ export default defineEventHandler(async (event) => {
 
       const uniqueIds = Array.from(new Set(equipmentIds));
 
-      // First, get all equipment with their images
+      // Check all equipment can be deleted
       const equipmentToDelete = await prisma.equipment.findMany({
         where: {
-          equipment_id: {
-            in: uniqueIds,
-          },
+          equipment_id: { in: uniqueIds },
         },
         select: {
           equipment_id: true,
+          name: true,
           imgUrl: true,
         },
       });
 
+      // Validate each equipment
+      const cannotDeleteList = [];
+      for (const equipment of equipmentToDelete) {
+        const checkResult = await checkEquipmentCanBeDeleted(
+          equipment.equipment_id
+        );
+        if (!checkResult.canDelete) {
+          cannotDeleteList.push({
+            name: equipment.name,
+            reason: `Used in ${checkResult.transactionCount} transactions, ${checkResult.returnCount} returns, ${checkResult.maintenanceCount} maintenance records`,
+          });
+        }
+      }
+
+      if (cannotDeleteList.length > 0) {
+        return createError({
+          statusCode: 400,
+          message: `Cannot delete equipment: ${cannotDeleteList
+            .map((item) => `${item.name} (${item.reason})`)
+            .join(", ")}`,
+        });
+      }
+
       // Delete images from storage
-      const imageDeletePromises = equipmentToDelete.map(equipment => 
+      const imageDeletePromises = equipmentToDelete.map((equipment) =>
         deleteImageIfExists(equipment.imgUrl)
       );
-      
-      // Wait for all image deletions to complete (but don't fail if some fail)
       await Promise.allSettled(imageDeletePromises);
 
       // Delete equipment from database
       await prisma.equipment.deleteMany({
         where: {
-          equipment_id: {
-            in: uniqueIds,
-          },
+          equipment_id: { in: uniqueIds },
         },
       });
 
@@ -110,11 +151,9 @@ export default defineEventHandler(async (event) => {
         });
       }
 
-      // First, get the equipment with its image
+      // Get equipment details
       const equipmentToDelete = await prisma.equipment.findUnique({
-        where: {
-          equipment_id: id,
-        },
+        where: { equipment_id: id },
         select: {
           equipment_id: true,
           imgUrl: true,
@@ -129,19 +168,26 @@ export default defineEventHandler(async (event) => {
         });
       }
 
+      // Check if equipment can be deleted
+      const checkResult = await checkEquipmentCanBeDeleted(id);
+      if (!checkResult.canDelete) {
+        return createError({
+          statusCode: 400,
+          message: `Tidak bisa menghapus peralatan "${equipmentToDelete.name}". Karena alat ini digunakan di ${checkResult.transactionCount} transaksi, ${checkResult.returnCount} pengembalian, dan ${checkResult.maintenanceCount} maintenance.`,
+        });
+      }
+
       // Delete image from storage if exists
       await deleteImageIfExists(equipmentToDelete.imgUrl);
 
       // Delete equipment from database
       await prisma.equipment.delete({
-        where: {
-          equipment_id: id,
-        },
+        where: { equipment_id: id },
       });
 
       return {
         statusCode: 200,
-        message: "Equipment deleted successfully",
+        message: "Peralatan berhasil di hapus",
         deletedEquipment: {
           id: equipmentToDelete.equipment_id,
           name: equipmentToDelete.name,
@@ -149,7 +195,7 @@ export default defineEventHandler(async (event) => {
       };
     }
   } catch (error: any) {
-    console.error('Equipment deletion error:', error);
+    console.error("Equipment deletion error:", error);
     throw createError({
       statusCode: error.statusCode || 500,
       message: error.message || "Internal Server Error",

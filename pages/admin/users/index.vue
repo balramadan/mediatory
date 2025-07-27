@@ -389,20 +389,15 @@ const formatDate = (dateString: any) => {
 };
 
 const getUserStatus = (user: any) => {
-  // Bisa disesuaikan dengan logic status yang diinginkan
-  const joinDate = new Date(user.created_at);
-  const now = new Date();
-  const daysDiff = Math.floor(
-    (now.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  if (daysDiff < 7) return "Baru";
-  return "Aktif";
+  if (user.status === "active") return "Aktif";
+  if (user.status === "inactive") return "Tidak Aktif";
+  return "Unknown";
 };
 
 const getStatusSeverity = (user: any) => {
-  const status = getUserStatus(user);
-  return status === "Baru" ? "info" : "success";
+  if (user.status === "active") return "success";
+  if (user.status === "inactive") return "danger";
+  return "secondary";
 };
 
 const viewUser = (user: any) => {

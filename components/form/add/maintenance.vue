@@ -97,14 +97,14 @@
     <div class="flex justify-end gap-2 mt-4">
       <Button
         label="Batal"
-        icon="pi pi-times"
+        icon="i-material-symbols:close"
         class="p-button-text"
         @click="emit('cancel')"
         type="button"
       />
       <Button
         label="Simpan"
-        icon="pi pi-check"
+        icon="i-material-symbols:save"
         @click="saveMaintenance"
         type="button"
       />

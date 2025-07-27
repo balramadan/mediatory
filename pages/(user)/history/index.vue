@@ -46,7 +46,7 @@
           <div class="flex flex-col justify-end">
             <Button
               label="Reset Filter"
-              icon="pi pi-refresh"
+              icon="i-material-symbols:refresh"
               severity="secondary"
               @click="resetFilters"
             />
@@ -84,7 +84,7 @@
 
       <template #empty>
         <div class="text-center py-8">
-          <i class="pi pi-inbox text-4xl text-gray-400 mb-4"></i>
+          <div class="i-material-symbols:inbox text-4xl text-gray-400 mb-4"></div>
           <p class="text-gray-600">Tidak ada riwayat peminjaman ditemukan</p>
         </div>
       </template>
@@ -137,11 +137,11 @@
         <template #body="slotProps">
           <div class="text-sm">
             <div class="flex items-center mb-1">
-              <i class="pi pi-calendar text-green-500 mr-2"></i>
+              <div class="i-material-symbols:calendar-month text-green-500 mr-2"></div>
               <span>Pinjam: {{ formatDate(slotProps.data.borrow_date) }}</span>
             </div>
             <div class="flex items-center">
-              <i class="pi pi-calendar text-red-500 mr-2"></i>
+              <div class="i-material-symbols:calendar-month text-red-500 mr-2"></div>
               <span>Kembali: {{ formatDate(slotProps.data.return_date) }}</span>
             </div>
           </div>
