@@ -152,10 +152,15 @@ const trUser = async () => {
   })
     .then((res: any) => {
       if (res.statusCode === 200) {
-        borrowed.value = res.data.filter((item: any) => item.status !== "completed");
+        borrowed.value = res.data.filter(
+          (item: any) =>
+            item.status !== "completed" &&
+            item.status !== "rejected" &&
+            item.status !== "cancelled"
+        );
       }
     })
-    .catch((err) => {
+    .catch(() => {
       toast.add({
         severity: "error",
         summary: "Error",
