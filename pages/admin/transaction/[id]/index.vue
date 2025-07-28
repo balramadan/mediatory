@@ -420,7 +420,7 @@ const approved = async () => {
       toast.add({
         severity: "error",
         summary: "Gagal",
-        detail: `Gagal menyetujui peminjaman: ${err}`,
+        detail: `Gagal menyetujui peminjaman`,
         life: 3000,
       });
     });
@@ -446,7 +446,7 @@ const rejected = async () => {
       toast.add({
         severity: "error",
         summary: "Gagal",
-        detail: `Gagal menyetujui peminjaman: ${err}`,
+        detail: `Gagal menolak peminjaman`,
         life: 3000,
       });
     });

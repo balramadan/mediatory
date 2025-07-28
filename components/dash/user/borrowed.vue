@@ -159,7 +159,7 @@ const trUser = async () => {
       toast.add({
         severity: "error",
         summary: "Error",
-        detail: `Gagal mendapatkan data peminjaman ${err}`,
+        detail: `Gagal mendapatkan data peminjaman`,
         life: 3000,
       });
     })

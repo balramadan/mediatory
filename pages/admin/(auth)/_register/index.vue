@@ -109,7 +109,7 @@ const register = async () => {
       toast.add({
           severity: "error",
           summary: "Gagal",
-          detail: `Gagal mendaftarkan admin: ${err}`,
+          detail: `Gagal mendaftarkan admin`,
           life: 3000,
         })
     });

@@ -305,7 +305,7 @@ const deleteCategory = async () => {
       toast.add({
         severity: "error",
         summary: "Gagal",
-        detail: `Gagal menghapus kategori: ${err}`,
+        detail: `Gagal menghapus kategori`,
         life: 3000,
       });
     });

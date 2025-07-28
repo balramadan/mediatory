@@ -299,7 +299,7 @@ const cancelled = async () => {
       toast.add({
         severity: "error",
         summary: "Gagal",
-        detail: `Gagal: ${err}`,
+        detail: `Gagal`,
         life: 3000,
       });
     });
@@ -323,7 +323,7 @@ const returned = async () => {
       toast.add({
         severity: "error",
         summary: "Gagal",
-        detail: `Gagal: ${err}`,
+        detail: `Gagal`,
         life: 3000,
       });
     });
