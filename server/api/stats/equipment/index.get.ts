@@ -35,29 +35,17 @@ export default defineEventHandler(async (event) => {
         },
       });
 
-      // Equipment terlambat (melewati return_date dan belum dikembalikan)
-      const overdueTransactions = await prisma.transactions.findMany({
+      // Equipment terlambat (status overdue) - gunakan aggregation yang lebih efisien
+      const overdueEquipment = await prisma.transactionDetail.aggregate({
         where: {
-          status: "approved",
-          return_status: "not_returned",
-          return_date: {
-            lt: new Date(),
+          transaction: {
+            status: "overdue",
           },
         },
-        include: {
-          equipments: true,
+        _sum: {
+          quantity: true,
         },
       });
-
-      const overdueEquipmentCount = overdueTransactions.reduce(
-        (total, transaction) => {
-          return (
-            total +
-            transaction.equipments.reduce((sum, eq) => sum + eq.quantity, 0)
-          );
-        },
-        0
-      );
 
       // Equipment dalam pemeliharaan
       const maintenanceDetail = await prisma.maintenance.aggregate({
@@ -69,16 +57,22 @@ export default defineEventHandler(async (event) => {
         },
       });
 
+      const totalQty = totalEquipment._sum.quantity || 0;
+      const activeQty = activeEquipment._sum.quantity || 0;
+      const overdueQty = overdueEquipment._sum.quantity || 0;
+      const maintenanceQty = maintenanceDetail._sum.quantity || 0;
+      const availableQty = totalQty - (activeQty + overdueQty + maintenanceQty);
+
       return {
         statusCode: 200,
         message: "Equipment statistics retrieved successfully",
         data: {
           _sum: {
-            quantity: totalEquipment._sum.quantity || 0,
+            quantity: totalQty,
           },
-          active: activeEquipment._sum.quantity || 0,
-          overdue: overdueEquipmentCount,
-          maintenance: maintenanceDetail._sum.quantity || 0,
+          active: activeQty,
+          overdue: overdueQty,
+          maintenance: maintenanceQty,
         },
       };
     } else {

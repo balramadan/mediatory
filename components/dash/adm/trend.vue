@@ -33,7 +33,7 @@
       <!-- Pastikan chart hanya render ketika data sudah ada -->
       <div v-if="isChartReady">
         <Chart
-          id="chartTrend"
+          id="chartData"
           type="line"
           :data="chartData"
           :options="chartOptions"

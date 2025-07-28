@@ -5,8 +5,8 @@
       class="bg-slate-100 w-full rounded shadow-xs px-5 py-2.5 flex flex-row items-center"
     >
       <div class="w-3/5">
-        <h3 class="text-xs">Total Alat</h3>
-        <p class="text-2xl font-bold">{{ stats._sum.quantity }}</p>
+        <h3 class="text-xs">Alat Tersedia</h3>
+        <p class="text-2xl font-bold">{{ availableEquipment }}</p>
       </div>
       <Divider class="w-1/5" layout="vertical" />
       <div class="w-1/5 flex justify-center">
@@ -71,6 +71,10 @@ const loading = computed(() => equipmentStatsStore.loading);
 const error = computed(() => equipmentStatsStore.error);
 
 let refreshInterval: NodeJS.Timeout | null = null;
+
+const availableEquipment = computed(() => {
+  return equipmentStatsStore.availableEquipment;
+});
 
 onMounted(async () => {
   await equipmentStatsStore.fetchStats();

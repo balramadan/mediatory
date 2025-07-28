@@ -50,7 +50,24 @@ export const useEquipmentStatsStore = defineStore("EquipmentStats", {
 
   getters: {
     availableEquipment: (state) => {
-      return state.stats._sum.quantity - state.stats.active - state.stats.maintenance;
+      // Equipment tersedia = Total equipment - (Active + Overdue + Maintenance)
+      // Active sudah tidak termasuk overdue, jadi kita perlu menambahkan overdue secara terpisah
+      const totalUnavailable = state.stats.active + state.stats.overdue + state.stats.maintenance;
+      const available = state.stats._sum.quantity - totalUnavailable;
+      
+      // Pastikan tidak negatif
+      return Math.max(0, available);
+    },
+
+    // Getter tambahan untuk debug
+    totalBorrowed: (state) => {
+      // Total equipment yang sedang dipinjam (active + overdue)
+      return state.stats.active + state.stats.overdue;
+    },
+
+    totalUnavailable: (state) => {
+      // Total equipment yang tidak tersedia
+      return state.stats.active + state.stats.overdue + state.stats.maintenance;
     },
   },
 });

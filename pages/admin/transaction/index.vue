@@ -67,7 +67,7 @@
           <Button
             icon="i-material-symbols:upload"
             label="Export"
-            @click="exportCSV"
+            @click="exportCSVManual"
             severity="secondary"
           />
         </div>
@@ -305,7 +305,10 @@
       :style="{ width: '30rem' }"
     >
       <div class="confirmation-content">
-        <i class="i-material-symbols:warning mr-3" style="font-size: 2rem; color: #f59e0b" />
+        <i
+          class="i-material-symbols:warning mr-3"
+          style="font-size: 2rem; color: #f59e0b"
+        />
         <div>
           <p class="mb-2">Anda yakin ingin menghapus transaksi ini?</p>
           <p class="text-sm text-gray-600 mb-2">
@@ -316,7 +319,9 @@
           </p>
           <div class="bg-yellow-50 border border-yellow-200 rounded p-3 mt-3">
             <p class="text-sm text-yellow-800">
-              <strong>Peringatan:</strong> Menghapus transaksi akan menghapus semua data terkait termasuk detail transaksi, detail pengembalian, dan notifikasi.
+              <strong>Peringatan:</strong> Menghapus transaksi akan menghapus
+              semua data terkait termasuk detail transaksi, detail pengembalian,
+              dan notifikasi.
             </p>
           </div>
         </div>
@@ -328,11 +333,11 @@
           text
           @click="deleteTransactionDialog = false"
         />
-        <Button 
-          label="Hapus" 
-          icon="i-material-symbols:check" 
+        <Button
+          label="Hapus"
+          icon="i-material-symbols:check"
           severity="danger"
-          @click="deleteTransaction" 
+          @click="deleteTransaction"
         />
       </template>
     </Dialog>
@@ -345,12 +350,19 @@
       :style="{ width: '35rem' }"
     >
       <div class="confirmation-content">
-        <i class="i-material-symbols:warning mr-3" style="font-size: 2rem; color: #f59e0b" />
+        <i
+          class="i-material-symbols:warning mr-3"
+          style="font-size: 2rem; color: #f59e0b"
+        />
         <div>
-          <p class="mb-2">Anda yakin ingin menghapus {{ selectedTransactions.length }} transaksi?</p>
+          <p class="mb-2">
+            Anda yakin ingin menghapus
+            {{ selectedTransactions.length }} transaksi?
+          </p>
           <div class="bg-yellow-50 border border-yellow-200 rounded p-3 mt-3">
             <p class="text-sm text-yellow-800">
-              <strong>Peringatan:</strong> Menghapus transaksi akan menghapus semua data terkait dan tidak dapat dikembalikan.
+              <strong>Peringatan:</strong> Menghapus transaksi akan menghapus
+              semua data terkait dan tidak dapat dikembalikan.
             </p>
           </div>
         </div>
@@ -362,11 +374,11 @@
           text
           @click="deleteTransactionsDialog = false"
         />
-        <Button 
-          label="Hapus Semua" 
-          icon="i-material-symbols:check" 
+        <Button
+          label="Hapus Semua"
+          icon="i-material-symbols:check"
           severity="danger"
-          @click="deleteSelectedTransactions" 
+          @click="deleteSelectedTransactions"
         />
       </template>
     </Dialog>
@@ -553,7 +565,7 @@ const selectedTransaction = ref<any>(null);
 
 const canDeleteTransaction = (transaction: any) => {
   // Only allow deletion for cancelled, rejected, or completed transactions
-  const deletableStatuses = ['cancelled', 'rejected', 'completed'];
+  const deletableStatuses = ["cancelled", "rejected", "completed"];
   return deletableStatuses.includes(transaction.status);
 };
 
@@ -563,12 +575,13 @@ const confirmDeleteTransaction = (transaction: any) => {
     toast.add({
       severity: "warn",
       summary: "Tidak Diizinkan",
-      detail: "Hanya transaksi yang dibatalkan, ditolak, atau selesai yang dapat dihapus",
+      detail:
+        "Hanya transaksi yang dibatalkan, ditolak, atau selesai yang dapat dihapus",
       life: 3000,
     });
     return;
   }
-  
+
   selectedTransaction.value = transaction;
   deleteTransactionDialog.value = true;
 };
@@ -660,7 +673,9 @@ const deleteSelectedTransactions = async () => {
       toast.add({
         severity: "success",
         summary: "Berhasil",
-        detail: `${res.deletedCount || selected.length} transaksi berhasil dihapus`,
+        detail: `${
+          res.deletedCount || selected.length
+        } transaksi berhasil dihapus`,
         life: 3000,
       });
       await refreshTransaction();
@@ -679,23 +694,74 @@ const deleteSelectedTransactions = async () => {
   }
 };
 
-// Update fungsi exportCSV
-const exportCSV = () => {
+// Fungsi untuk mengolah data sebelum export
+const exportFunction = (data: any[]) => {
+  return data.map((transaction) => {
+    // Debug log untuk melihat struktur data
+    console.log('Transaction equipments:', transaction.equipments);
+    
+    return {
+      transaction_id: transaction.transaction_id,
+      user_name: transaction.user?.full_name || "",
+      project: transaction.project || "",
+      purpose: transaction.purpose || "",
+      // Pastikan equipments dikonversi dengan benar
+      equipments: Array.isArray(transaction.equipments) 
+        ? transaction.equipments
+            .map((item: any) => {
+              // Cek berbagai kemungkinan struktur data
+              if (item?.equipment?.name) {
+                return item.equipment.name;
+              } else if (item?.name) {
+                return item.name;
+              } else if (typeof item === 'string') {
+                return item;
+              } else {
+                return 'Unknown Equipment';
+              }
+            })
+            .join(", ")
+        : "",
+      status: getStatusLabel(transaction.status),
+      return_status: getReturnStatusLabel(transaction.return_status),
+      urgent: transaction.urgent ? "Mendesak" : "Tidak Mendesak",
+      borrow_date: new Date(transaction.borrow_date).toLocaleDateString("id-ID"),
+      return_date: new Date(transaction.return_date).toLocaleDateString("id-ID"),
+    };
+  });
+};
+
+// Helper functions untuk status labels
+const getStatusLabel = (status: string) => {
+  const statusMap: Record<string, string> = {
+    pending: "Menunggu Konfirmasi",
+    approved: "Disetujui",
+    rejected: "Ditolak",
+    cancelled: "Dibatalkan",
+    overdue: "Terlambat",
+    completed: "Selesai",
+  };
+  return statusMap[status] || status;
+};
+
+const getReturnStatusLabel = (returnStatus: string) => {
+  const returnStatusMap: Record<string, string> = {
+    not_returned: "Belum dikembalikan",
+    pending_check: "Sedang di cek",
+    returned_damaged: "Ada kerusakan",
+    returned_incomplete: "Tidak lengkap / Hilang",
+    returned_complete: "Pengembalian selesai",
+  };
+  return returnStatusMap[returnStatus] || returnStatus;
+};
+
+// Alternative: Buat fungsi export manual tanpa menggunakan DataTable exportCSV
+const exportCSVManual = () => {
   let fileName = "transactions";
 
   const monthNames = [
-    "januari",
-    "februari",
-    "maret",
-    "april",
-    "mei",
-    "juni",
-    "juli",
-    "agustus",
-    "september",
-    "oktober",
-    "november",
-    "desember",
+    "januari", "februari", "maret", "april", "mei", "juni",
+    "juli", "agustus", "september", "oktober", "november", "desember",
   ];
 
   // Build filename based on selected filters
@@ -712,10 +778,106 @@ const exportCSV = () => {
     fileName += "-all";
   }
 
-  dt.value.exportCSV({
-    selectionOnly: false,
-    fileName: `${fileName}-${new Date().toISOString().split("T")[0]}.csv`,
-  });
+  // Get processed data
+  const processedData = exportFunction(filteredTransactions.value);
+  
+  // Manual CSV creation
+  const headers = [
+    "ID Transaksi",
+    "Nama User", 
+    "Proyek",
+    "Tujuan",
+    "Peralatan",
+    "Status",
+    "Status Pengembalian",
+    "Prioritas",
+    "Tanggal Pinjam",
+    "Tanggal Kembali"
+  ];
+  
+  const csvContent = [
+    headers.join(","),
+    ...processedData.map(row => [
+      row.transaction_id,
+      `"${row.user_name}"`,
+      `"${row.project}"`,
+      `"${row.purpose}"`,
+      `"${row.equipments}"`,
+      `"${row.status}"`,
+      `"${row.return_status}"`,
+      `"${row.urgent}"`,
+      `"${row.borrow_date}"`,
+      `"${row.return_date}"`
+    ].join(","))
+  ].join("\n");
+
+  // Download CSV
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", `${fileName}-${new Date().toISOString().split("T")[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+// Update fungsi exportCSV - gunakan pendekatan yang lebih reliable
+const exportCSV = () => {
+  // Coba method DataTable dulu
+  try {
+    let fileName = "transactions";
+
+    const monthNames = [
+      "januari", "februari", "maret", "april", "mei", "juni",
+      "juli", "agustus", "september", "oktober", "november", "desember",
+    ];
+
+    // Build filename
+    if (selectedYear.value || selectedMonth.value) {
+      const parts = [];
+      if (selectedMonth.value !== null) {
+        parts.push(monthNames[selectedMonth.value]);
+      }
+      if (selectedYear.value !== null) {
+        parts.push(selectedYear.value.toString());
+      }
+      fileName += `-${parts.join("-")}`;
+    } else {
+      fileName += "-all";
+    }
+
+    // Buat data yang sudah diproses
+    const processedData = filteredTransactions.value.map((transaction) => ({
+      'ID Transaksi': `#${transaction.transaction_id}`,
+      'Nama User': transaction.user?.full_name || "",
+      'Proyek': transaction.project || "",
+      'Tujuan': transaction.purpose || "",
+      'Peralatan': Array.isArray(transaction.equipments) 
+        ? transaction.equipments
+            .map((item: any) => item?.equipment?.name || item?.name || 'Unknown')
+            .join(", ")
+        : "",
+      'Status': getStatusLabel(transaction.status),
+      'Status Pengembalian': getReturnStatusLabel(transaction.return_status),
+      'Prioritas': transaction.urgent ? "Mendesak" : "Tidak Mendesak",
+      'Tanggal Pinjam': new Date(transaction.borrow_date).toLocaleDateString("id-ID"),
+      'Tanggal Kembali': new Date(transaction.return_date).toLocaleDateString("id-ID"),
+    }));
+
+    // Gunakan exportCSV dengan data yang sudah diproses
+    dt.value.exportCSV({
+      selectionOnly: false,
+      fileName: `${fileName}-${new Date().toISOString().split("T")[0]}.csv`,
+      data: processedData,
+    });
+
+  } catch (error) {
+    console.error('DataTable export failed, using manual method:', error);
+    // Fallback ke method manual
+    exportCSVManual();
+  }
 };
 
 onMounted(async () => {

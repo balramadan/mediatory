@@ -36,9 +36,20 @@ export default defineEventHandler(async (event) => {
         select: { status: true, return_status: true },
       });
 
-      // If transaction was approved but not returned completely, restore quantities
-      if (transaction?.status === 'approved' && transaction?.return_status !== 'returned_complete') {
+      // If transaction was approved OR overdue but not returned completely, restore quantities
+      if (
+        (transaction?.status === 'approved' || transaction?.status === 'overdue') && 
+        transaction?.return_status !== 'returned_complete'
+      ) {
+        console.log(`Restoring quantities for transaction ${transactionId} with status: ${transaction.status}, return_status: ${transaction.return_status}`);
+        
         for (const detail of transactionDetails) {
+          // Get current equipment data for logging
+          const currentEquipment = await tx.equipment.findUnique({
+            where: { equipment_id: detail.equipment_id },
+            select: { name: true, available_quantity: true }
+          });
+
           await tx.equipment.update({
             where: { equipment_id: detail.equipment_id },
             data: {
@@ -47,7 +58,11 @@ export default defineEventHandler(async (event) => {
               },
             },
           });
+
+          console.log(`Restored ${detail.quantity} units of ${currentEquipment?.name} (from ${currentEquipment?.available_quantity} to ${(currentEquipment?.available_quantity || 0) + detail.quantity})`);
         }
+      } else {
+        console.log(`No quantity restoration needed for transaction ${transactionId} - Status: ${transaction?.status}, Return Status: ${transaction?.return_status}`);
       }
     };
 
@@ -96,6 +111,18 @@ export default defineEventHandler(async (event) => {
           statusCode: 400,
           message: `Cannot delete ${undeletableTransactions.length} transaction(s) with active status. Only cancelled, rejected, or completed transactions can be deleted.`,
         });
+      }
+
+      // Log transactions that will have quantities restored
+      const transactionsToRestore = transactionsToDelete.filter(t => 
+        (t.status === 'approved' || t.status === 'overdue') && 
+        t.return_status !== 'returned_complete'
+      );
+      
+      if (transactionsToRestore.length > 0) {
+        console.log(`Will restore quantities for ${transactionsToRestore.length} transactions:`, 
+          transactionsToRestore.map(t => `#${t.transaction_id} (${t.status})`).join(', ')
+        );
       }
 
       // Delete transactions and related data in a transaction
@@ -166,6 +193,14 @@ export default defineEventHandler(async (event) => {
           statusCode: 400,
           message: `Cannot delete transaction with status "${transactionToDelete.status}". Only cancelled, rejected, or completed transactions can be deleted.`,
         });
+      }
+
+      // Log if quantities will be restored
+      if (
+        (transactionToDelete.status === 'approved' || transactionToDelete.status === 'overdue') && 
+        transactionToDelete.return_status !== 'returned_complete'
+      ) {
+        console.log(`Will restore quantities for transaction #${id} with status: ${transactionToDelete.status}`);
       }
 
       // Delete transaction and related data in a transaction
