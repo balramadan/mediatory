@@ -9,7 +9,7 @@
           @click.prevent="openNew"
         />
         <Button
-          label="Delete"
+          label="Hapus"
           icon="i-material-symbols:delete"
           severity="danger"
           class="ml-2"
@@ -119,14 +119,14 @@
       </div>
       <template #footer>
         <Button
-          label="No"
+          label="Tidak"
           icon="i-material-symbols:close"
           severity="danger"
           text
           @click="deleteCategoriesDialog = false"
         />
         <Button
-          label="Yes"
+          label="Ya"
           icon="i-material-symbols:check"
           text
           @click="deleteSelectedCategory"
@@ -165,14 +165,14 @@
       </div>
       <template #footer>
         <Button
-          label="No"
+          label="Tidak"
           icon="i-material-symbols:close"
           severity="danger"
           text
           @click="deleteCategoryDialog = false"
         />
         <Button
-          label="Yes"
+          label="Ya"
           icon="i-material-symbols:check"
           text
           @click="deleteCategory"
@@ -254,7 +254,7 @@ const deleteSelectedCategory = async () => {
       toast.add({
         severity: "error",
         summary: "Gagal",
-        detail: `Gagal menghapus kategori: ${err}`,
+        detail: `Gagal menghapus kategori`,
         life: 3000,
       });
     });

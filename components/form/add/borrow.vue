@@ -81,7 +81,7 @@
           </div>
           <div class="flex py-6 gap-2">
             <Button
-              label="Back"
+              label="Kembali"
               severity="secondary"
               @click="activateCallback('1')"
             />

@@ -224,7 +224,7 @@ const itemsNotif = ref([
     },
   },
   {
-    label: "Delete",
+    label: "Hapus",
     icon: "i-material-symbols:delete",
     command: async () => {
       await deleteNotif();

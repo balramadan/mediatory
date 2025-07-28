@@ -198,6 +198,7 @@
         <Button
           label="Tidak"
           icon="i-material-symbols:close"
+          severity="danger"
           text
           @click="deleteEquipmentDialog = false"
         />
@@ -225,6 +226,7 @@
         <Button
           label="Tidak"
           icon="i-material-symbols:close"
+          severity="danger"
           text
           @click="deleteEquipmentsDialog = false"
         />
